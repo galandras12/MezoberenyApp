@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Terracotta sky/field base -->
+    <path
+        android:fillColor="#B85C1E"
+        android:pathData="M0,0 h108 v108 h-108 z" />
+
+    <!-- Golden sun -->
+    <path
+        android:fillColor="#F2B441"
+        android:pathData="M68,26 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 z" />
+
+    <!-- Olive farmland band (nod to Mezőberény's agricultural surroundings) -->
+    <path
+        android:fillColor="#5B7F32"
+        android:pathData="M0,72 h108 v36 h-108 z" />
+
+    <!-- Stylised tulips (nod to the Mezőberényi Cifrakert folk garden) -->
+    <path
+        android:fillColor="#FBEEDD"
+        android:pathData="M18,84 h2 v20 h-2 z M14,84 L24,84 L19,74 Z" />
+    <path
+        android:fillColor="#FBEEDD"
+        android:pathData="M88,84 h2 v20 h-2 z M84,84 L94,84 L89,74 Z" />
+</vector>
