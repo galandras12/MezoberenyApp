@@ -1,0 +1,40 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Blocky "MB" monogram, kept inside the 66x66dp adaptive-icon safe zone -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M26,36 h5 v5 h-5 z
+            M46,36 h5 v5 h-5 z
+            M26,41 h10 v5 h-10 z
+            M41,41 h10 v5 h-10 z
+            M26,46 h5 v5 h-5 z
+            M36,46 h5 v5 h-5 z
+            M46,46 h5 v5 h-5 z
+            M26,51 h5 v5 h-5 z
+            M36,51 h5 v5 h-5 z
+            M46,51 h5 v5 h-5 z
+            M26,56 h5 v5 h-5 z
+            M46,56 h5 v5 h-5 z
+            M26,61 h5 v5 h-5 z
+            M46,61 h5 v5 h-5 z
+            M26,66 h5 v5 h-5 z
+            M46,66 h5 v5 h-5 z
+
+            M56,36 h20 v5 h-20 z
+            M56,41 h5 v5 h-5 z
+            M76,41 h5 v5 h-5 z
+            M56,46 h5 v5 h-5 z
+            M76,46 h5 v5 h-5 z
+            M56,51 h20 v5 h-20 z
+            M56,56 h5 v5 h-5 z
+            M76,56 h5 v5 h-5 z
+            M56,61 h5 v5 h-5 z
+            M76,61 h5 v5 h-5 z
+            M56,66 h20 v5 h-20 z
+        " />
+</vector>

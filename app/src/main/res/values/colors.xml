@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#B85C1E</color>
+    <color name="brand_primary_dark">#8C4415</color>
+    <color name="brand_accent">#5B7F32</color>
+
+    <!-- Offline / loading screen: light theme -> light background, dark grey text -->
+    <color name="connection_background">#FAFAFA</color>
+    <color name="connection_text">#424242</color>
+    <color name="connection_icon">#616161</color>
+</resources>
