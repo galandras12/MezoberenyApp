@@ -204,6 +204,129 @@
 	}
 
 	/* ------------------------------------------------------------------
+	 * Diavetítés
+	 * ------------------------------------------------------------------ */
+	function initSlider() {
+		var slider = document.querySelector('.mb-slider');
+
+		if (!slider) {
+			return;
+		}
+
+		var track = slider.querySelector('[data-mb-slider-track]');
+		var slides = track ? Array.prototype.slice.call(track.children) : [];
+
+		if (!track || slides.length < 2) {
+			return;
+		}
+
+		var dots = Array.prototype.slice.call(slider.querySelectorAll('.mb-slider__dot'));
+		var index = 0;
+		var timer = null;
+
+		function reducedMotion() {
+			return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		}
+
+		function goTo(next) {
+			index = (next + slides.length) % slides.length;
+
+			track.scrollTo({
+				left: slides[index].offsetLeft,
+				behavior: reducedMotion() ? 'auto' : 'smooth'
+			});
+
+			dots.forEach(function (dot, i) {
+				dot.classList.toggle('is-active', i === index);
+			});
+		}
+
+		function start() {
+			if (slider.dataset.autoplay !== '1' || reducedMotion()) {
+				return;
+			}
+
+			stop();
+			timer = window.setInterval(function () {
+				goTo(index + 1);
+			}, parseInt(slider.dataset.interval, 10) || 5000);
+		}
+
+		function stop() {
+			if (timer) {
+				window.clearInterval(timer);
+				timer = null;
+			}
+		}
+
+		var prev = slider.querySelector('[data-mb-slider-prev]');
+		var next = slider.querySelector('[data-mb-slider-next]');
+
+		if (prev) {
+			prev.addEventListener('click', function () {
+				goTo(index - 1);
+				start();
+			});
+		}
+
+		if (next) {
+			next.addEventListener('click', function () {
+				goTo(index + 1);
+				start();
+			});
+		}
+
+		dots.forEach(function (dot) {
+			dot.addEventListener('click', function () {
+				goTo(parseInt(dot.dataset.index, 10) || 0);
+				start();
+			});
+		});
+
+		// Kézi görgetés esetén kövessük, melyik dia látszik.
+		var scrollTimer = null;
+
+		track.addEventListener('scroll', function () {
+			window.clearTimeout(scrollTimer);
+
+			scrollTimer = window.setTimeout(function () {
+				var closest = 0;
+				var smallest = Infinity;
+
+				slides.forEach(function (slide, i) {
+					var distance = Math.abs(slide.offsetLeft - track.scrollLeft);
+
+					if (distance < smallest) {
+						smallest = distance;
+						closest = i;
+					}
+				});
+
+				index = closest;
+				dots.forEach(function (dot, i) {
+					dot.classList.toggle('is-active', i === index);
+				});
+			}, 120);
+		}, { passive: true });
+
+		// Ne váltson, amíg a látogató a diavetítés fölött van.
+		slider.addEventListener('mouseenter', stop);
+		slider.addEventListener('mouseleave', start);
+		slider.addEventListener('focusin', stop);
+		slider.addEventListener('touchstart', stop, { passive: true });
+
+		document.addEventListener('visibilitychange', function () {
+			if (document.hidden) {
+				stop();
+			} else {
+				start();
+			}
+		});
+
+		start();
+	}
+
+	/* ------------------------------------------------------------------
 	 * Indítás
 	 * ------------------------------------------------------------------ */
 	function init() {
@@ -211,6 +334,7 @@
 		initSearch();
 		initDock();
 		initBack();
+		initSlider();
 	}
 
 	if (document.readyState === 'loading') {
@@ -223,5 +347,8 @@
 	// ezért nincs mit újra bekötni – csak jelezzük, hogy már léptünk oldalt.
 	document.addEventListener('mbapp:navigated', function () {
 		document.body.dataset.mbappNavigated = '1';
+
+		// A tartalommal együtt a diavetítés is kicserélődhetett.
+		initSlider();
 	});
 })();

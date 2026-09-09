@@ -7,13 +7,19 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MBAPP_THEME_VERSION', '1.0.0' );
+define( 'MBAPP_THEME_VERSION', '1.1.0' );
 define( 'MBAPP_THEME_DIR', get_template_directory() );
 define( 'MBAPP_THEME_URI', get_template_directory_uri() );
 
+require_once MBAPP_THEME_DIR . '/inc/settings.php';
 require_once MBAPP_THEME_DIR . '/inc/theme-support.php';
 require_once MBAPP_THEME_DIR . '/inc/template-tags.php';
+require_once MBAPP_THEME_DIR . '/inc/components.php';
 require_once MBAPP_THEME_DIR . '/inc/customizer.php';
+
+if ( is_admin() ) {
+	require_once MBAPP_THEME_DIR . '/inc/admin.php';
+}
 
 /**
  * Stíluslapok és szkriptek betöltése.
@@ -64,12 +70,22 @@ function mbapp_theme_assets() {
 	$width     = isset( $widths[ $width_key ] ) ? $widths[ $width_key ] : $widths['compact'];
 
 	$custom = sprintf(
-		':root{--mb-accent:%1$s;--mb-accent-2:%2$s;--mb-accent-contrast:%3$s;--mb-content-max:%4$s;}',
+		':root{--mb-accent:%1$s;--mb-accent-2:%2$s;--mb-accent-contrast:%3$s;--mb-content-max:%4$s;--mb-appbar-h:%5$dpx;--mb-logo-size:%6$dpx;}',
 		esc_attr( $accent ),
 		esc_attr( $accent_2 ),
 		esc_attr( mbapp_theme_contrast_color( $accent ) ),
-		esc_attr( $width )
+		esc_attr( $width ),
+		esc_attr( mbapp_theme_appbar_height() ),
+		esc_attr( max( 24, min( 64, (int) mbapp_theme_get_option( 'logo_size' ) ) ) )
 	);
+
+	if ( ! mbapp_theme_get_option( 'appbar_sticky' ) ) {
+		$custom .= '.mb-appbar{position:relative;}';
+	}
+
+	if ( ! mbapp_theme_get_option( 'appbar_blur' ) ) {
+		$custom .= '.mb-appbar{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--mb-surface);}';
+	}
 
 	wp_add_inline_style( 'mbapp-theme', $custom );
 
@@ -153,6 +169,13 @@ function mbapp_theme_body_classes( $classes ) {
 	$classes[] = 'mb-body';
 	$classes[] = 'mb-app-shell';
 	$classes[] = 'mb-width-' . mbapp_theme_get_option( 'app_width', 'compact' );
+
+	if ( ! mbapp_theme_get_option( 'show_footer' ) ) {
+		$classes[] = 'mb-no-footer';
+	}
+
+	$classes[] = 'mb-appbar-' . mbapp_theme_get_option( 'appbar_size' );
+	$classes[] = 'mb-icon-' . mbapp_theme_get_option( 'favicon_shape' );
 
 	if ( mbapp_theme_has_plugin() ) {
 		$classes[] = 'mb-has-plugin';

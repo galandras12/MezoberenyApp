@@ -82,8 +82,18 @@ function mbapp_theme_back_url() {
 function mbapp_theme_brand() {
 	$name = get_bloginfo( 'name' );
 	?>
+	<?php
+	$favicon_id  = (int) mbapp_theme_get_option( 'favicon' );
+	$favicon_url = ( $favicon_id && mbapp_theme_get_option( 'favicon_in_appbar' ) )
+		? wp_get_attachment_image_url( $favicon_id, array( 96, 96 ) )
+		: '';
+	?>
 	<a class="mb-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-		<?php if ( has_custom_logo() ) : ?>
+		<?php if ( $favicon_url ) : ?>
+			<span class="mb-brand__logo mb-brand__logo--icon">
+				<img src="<?php echo esc_url( $favicon_url ); ?>" alt="" width="96" height="96" decoding="async">
+			</span>
+		<?php elseif ( has_custom_logo() ) : ?>
 			<span class="mb-brand__logo"><?php the_custom_logo(); ?></span>
 		<?php else : ?>
 			<span class="mb-brand__mark" aria-hidden="true"><?php echo esc_html( mbapp_theme_initials( $name ) ); ?></span>
