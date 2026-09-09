@@ -1,0 +1,210 @@
+/* ==========================================================================
+   MBapp Plugin – admin stílusok
+   ========================================================================== */
+
+.mbapp-admin .mbapp-cards {
+	display: grid;
+	gap: 16px;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	margin: 20px 0;
+}
+
+.mbapp-adminbox {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 10px;
+	padding: 16px 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.mbapp-adminbox h2 {
+	margin-top: 0;
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+	color: #50575e;
+}
+
+.mbapp-stat {
+	margin: 0;
+	font-size: 34px;
+	font-weight: 700;
+	line-height: 1.1;
+	color: #1d2327;
+}
+
+.mbapp-list { margin-left: 18px; list-style: disc; }
+.mbapp-list li { margin-bottom: 6px; }
+
+.mbapp-error { color: #b32d2e; font-weight: 600; }
+
+/* Állapot pirulák */
+.mbapp-pill {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.7;
+	background: #f0f0f1;
+	color: #50575e;
+	white-space: nowrap;
+}
+.mbapp-pill--imported,
+.mbapp-pill--ok { background: #edfaef; color: #1d7a34; }
+.mbapp-pill--updated { background: #eef4ff; color: #1a4fa0; }
+.mbapp-pill--duplicate { background: #fff7e6; color: #8a6100; }
+.mbapp-pill--skipped { background: #f6f7f7; color: #646970; }
+.mbapp-pill--error { background: #fcf0f1; color: #b32d2e; }
+.mbapp-pill--info { background: #f0f6fc; color: #2271b1; }
+.mbapp-pill--off { background: #f6f7f7; color: #646970; }
+
+.mbapp-log-thumb {
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 6px;
+}
+
+.mbapp-preview img { display: block; }
+
+/* --------------------------------------------------------------------------
+   Elrendezés választó
+   -------------------------------------------------------------------------- */
+.mbapp-layoutpick {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.mbapp-layoutpick__opt {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 12px 16px;
+	border: 2px solid #dcdcde;
+	border-radius: 10px;
+	cursor: pointer;
+	background: #fff;
+	min-width: 150px;
+	transition: border-color .2s ease, box-shadow .2s ease;
+}
+.mbapp-layoutpick__opt:hover { border-color: #a7aaad; }
+.mbapp-layoutpick__opt:has(input:checked) {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.mbapp-layoutpick__preview {
+	display: grid;
+	gap: 4px;
+	width: 92px;
+	height: 58px;
+	padding: 6px;
+	background: #f6f7f7;
+	border-radius: 6px;
+}
+.mbapp-layoutpick__preview span {
+	background: #c3c4c7;
+	border-radius: 3px;
+}
+.mbapp-layoutpick__preview--grid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mbapp-layoutpick__preview--list { grid-template-rows: repeat(3, 1fr); }
+
+/* --------------------------------------------------------------------------
+   Menüpont szerkesztő
+   -------------------------------------------------------------------------- */
+.mbapp-items {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 16px;
+	max-width: 1100px;
+}
+
+.mbapp-item {
+	display: grid;
+	grid-template-columns: 26px 52px 1fr 28px;
+	align-items: start;
+	gap: 12px;
+	padding: 14px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-left: 4px solid #2271b1;
+	border-radius: 8px;
+}
+
+.mbapp-item-placeholder {
+	height: 90px;
+	border: 2px dashed #c3c4c7;
+	border-radius: 8px;
+	background: #f6f7f7;
+}
+
+.mbapp-item__handle {
+	cursor: grab;
+	color: #a7aaad;
+	font-size: 18px;
+	line-height: 1.4;
+	user-select: none;
+	padding-top: 8px;
+}
+.mbapp-item__handle:active { cursor: grabbing; }
+
+.mbapp-item__preview {
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	background: #f0f6fc;
+	color: #2271b1;
+	border-radius: 10px;
+}
+
+.mbapp-item__fields {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.mbapp-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #50575e;
+}
+.mbapp-field input,
+.mbapp-field select { width: 100%; }
+.mbapp-field--sm { max-width: 220px; }
+
+.mbapp-item__checks {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+	font-size: 12px;
+	color: #50575e;
+}
+
+.mbapp-item__remove {
+	color: #b32d2e;
+	font-size: 16px;
+	text-decoration: none;
+	cursor: pointer;
+	padding-top: 6px;
+}
+.mbapp-item__remove:hover { color: #8a2424; }
+
+@media (max-width: 782px) {
+	.mbapp-item { grid-template-columns: 24px 1fr 28px; }
+	.mbapp-item__preview { display: none; }
+}
+
+/* Metadoboz */
+.mbapp-metabox__row { margin-bottom: 16px; }
+.mbapp-metabox .description { display: block; margin-top: 4px; color: #646970; }
+.mbapp-req { color: #b32d2e; }
