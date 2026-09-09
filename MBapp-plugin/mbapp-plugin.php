@@ -38,6 +38,7 @@ require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-install.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-logger.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-post-types.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-selector.php';
+require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-source-detector.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-news-importer.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-events.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-shortcodes.php';

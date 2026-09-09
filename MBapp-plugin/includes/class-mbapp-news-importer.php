@@ -185,7 +185,48 @@ class MBapp_News_Importer {
 			return $this->parse_feed( $body, $source );
 		}
 
-		return $this->parse_html( $body, $source );
+		if ( 'jsonld' === $type ) {
+			return $this->parse_jsonld( $body, $source );
+		}
+
+		$items = $this->parse_html( $body, $source );
+
+		// Ha a szelektorokkal nem találtunk semmit, még megnézzük a
+		// strukturált adatot – sok oldal kiteszi JSON-LD-ben a híreket.
+		if ( empty( $items ) ) {
+			$fallback = $this->parse_jsonld( $body, $source );
+
+			if ( ! empty( $fallback ) ) {
+				$this->log(
+					'info',
+					__( 'A megadott szelektorok nem hoztak találatot, ezért a JSON-LD strukturált adatból olvastuk be a híreket.', 'mbapp' ),
+					array( 'source_url' => $source )
+				);
+
+				return $fallback;
+			}
+		}
+
+		return $items;
+	}
+
+	/**
+	 * JSON-LD strukturált adatból kiolvasott hírek.
+	 *
+	 * @param string $body HTML.
+	 * @param string $base Alap URL.
+	 * @return array
+	 */
+	public function parse_jsonld( $body, $base ) {
+		$items = MBapp_Source_Detector::extract_jsonld_items( $body, $base );
+
+		foreach ( $items as &$item ) {
+			$item['date'] = $this->parse_date( $item['date'] );
+		}
+
+		unset( $item );
+
+		return $items;
 	}
 
 	/**

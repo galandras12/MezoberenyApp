@@ -21,6 +21,7 @@ class MBapp_Ajax {
 
 		add_action( 'wp_ajax_mbapp_run_import', array( $this, 'run_import' ) );
 		add_action( 'wp_ajax_mbapp_preview_source', array( $this, 'preview_source' ) );
+		add_action( 'wp_ajax_mbapp_detect_source', array( $this, 'detect_source' ) );
 	}
 
 	/**
@@ -141,5 +142,31 @@ class MBapp_Ajax {
 				'items' => $rows,
 			)
 		);
+	}
+
+	/**
+	 * Forrás felderítése: mit ad vissza az oldal, és milyen szelektorok illenek rá.
+	 */
+	public function detect_source() {
+		check_ajax_referer( 'mbapp_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Nincs jogosultságod ehhez.', 'mbapp' ) ), 403 );
+		}
+
+		$url = isset( $_POST['source_url'] ) ? esc_url_raw( wp_unslash( $_POST['source_url'] ) ) : '';
+
+		if ( ! $url ) {
+			$url = (string) MBapp_Settings::get( 'news', 'source_url', '' );
+		}
+
+		$detector = new MBapp_Source_Detector( array( 'fetch_full_content' => 0 ) );
+		$report   = $detector->analyze( $url );
+
+		if ( is_wp_error( $report ) ) {
+			wp_send_json_error( array( 'message' => $report->get_error_message() ) );
+		}
+
+		wp_send_json_success( $report );
 	}
 }

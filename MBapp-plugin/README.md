@@ -19,6 +19,7 @@ MBapp-plugin/
 │   ├── class-mbapp-logger.php         import napló (saját tábla)
 │   ├── class-mbapp-post-types.php     Hírek / Események bejegyzéstípusok
 │   ├── class-mbapp-selector.php       CSS → XPath fordító
+│   ├── class-mbapp-source-detector.php  forrás diagnosztika, szelektor javaslat, JSON-LD
 │   ├── class-mbapp-news-importer.php  RSS és HTML beolvasó
 │   ├── class-mbapp-events.php         esemény mezők, lekérdezések, takarítás
 │   ├── class-mbapp-shortcodes.php     [mbapp_events], [mbapp_news], [mbapp_source]
@@ -35,7 +36,7 @@ MBapp-plugin/
 
 * **MBapp → Áttekintés** – állapot, utolsó és következő futás, kézi import, shortcode súgó
 * **MBapp → Hírek / Események** – a tartalmak kezelése
-* **MBapp → Hírbeolvasó** – forrás, szelektorok, próbalekérés, import beállítások
+* **MBapp → Hírbeolvasó** – forrás, szerkezetfelismerés, szelektorok, próbalekérés, import beállítások
 * **MBapp → Import napló** – naplózott futások, szűrés, keresés, törlés
 * **MBapp → Esemény beállítások** – elrendezés (lista/rács), 25-ös lapméret, 7 napos türelmi idő, forrás
 * **MBapp → Lebegő menü** – gombok, ikonok, URL-ek, pozíció, stílus
