@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Offline / loading screen: dark theme -> black background, light grey text -->
-    <color name="connection_background">#000000</color>
-    <color name="connection_text">#E0E0E0</color>
-    <color name="connection_icon">#BDBDBD</color>
-</resources>

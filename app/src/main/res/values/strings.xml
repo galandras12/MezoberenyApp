@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">Mezőberény App</string>
-    <string name="site_url" translatable="false">https://sites.google.com/view/mezobereny-app/</string>
-    <string name="no_connection_message">Stabil internetkapcsolat szükséges az alkalmazás használatához.</string>
-</resources>
