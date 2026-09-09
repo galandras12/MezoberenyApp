@@ -6,10 +6,13 @@ Két önálló, de együttműködő WordPress csomag egy alkalmazás-jellegű v�
 |---|---|---|
 | `MBapp-theme/` | Webapp kinézetű téma sötét/világos kapcsolóval | `wp-content/themes/MBapp-theme/` |
 | `MBapp-plugin/` | Hírbeolvasó + eseménykezelő + lebegő menü | `wp-content/plugins/MBapp-plugin/` |
+| `MBapp-Android/` | Android héj a webapphoz (WebView) | Android Studio projekt |
 
 > **Megjegyzés:** a kéréshez csatolt képernyőkép nem érkezett meg, ezért a felület egy általános
 > mobilalkalmazás-mintát követ (felső app bar, kártyás tartalom, alul lebegő menü). A színek,
 > az ikonok, a menüpontok és az elrendezés admin felületről szabadon átállíthatók.
+
+A téma és a bővítmény **v1.1.0**, az Android alkalmazás **1.1.0 (versionCode 1)**.
 
 ---
 
@@ -230,6 +233,18 @@ Az automatikus felismerés is ezt csinálja, csak gyorsabban.
 A beállítások **AJAX-szal mentődnek**: az oldal nem töltődik újra, nem ugrik a tetejére, és a
 mentés gomb mögött megjelenik egy zöld **pipa** („Elmentve”), amely néhány másodperc után elhalványul.
 Ha JavaScript nélkül használod az admint, a hagyományos űrlapbeküldés változatlanul működik.
+
+---
+
+## MBapp Android
+
+A `MBapp-Android/` mappa egy önálló Android Studio projekt: teljes képernyős WebView,
+amely kizárólag a `https://mezoberenyapp.rf.gd/` címet nyitja meg, minden más
+hivatkozást pedig az alapértelmezett böngészőnek ad át. Ellenőrzi a mobilnet / Wi-Fi /
+Ethernet kapcsolatot, kapcsolat nélkül érthető hibaüzenetet mutat, a vissza gomb pedig a
+böngészőelőzmények szerint működik – kilépni csak a főoldalon, három visszalépéssel lehet.
+
+Részletek és fordítási útmutató: [`MBapp-Android/README.md`](MBapp-Android/README.md)
 
 ---
 
