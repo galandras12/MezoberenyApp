@@ -20,6 +20,7 @@ class MBapp_Admin {
 		add_action( 'admin_init', array( $this, 'handle_forms' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_filter( 'plugin_action_links_' . MBAPP_PLUGIN_BASENAME, array( $this, 'action_links' ) );
+		add_action( 'wp_ajax_mbapp_save_settings', array( $this, 'ajax_save' ) );
 	}
 
 	/**
@@ -43,6 +44,15 @@ class MBapp_Admin {
 			'manage_options',
 			'mbapp',
 			array( $this, 'render_dashboard' )
+		);
+
+		add_submenu_page(
+			'mbapp',
+			__( 'Kezdőlap', 'mbapp' ),
+			__( 'Kezdőlap', 'mbapp' ),
+			'manage_options',
+			'mbapp-home',
+			array( $this, 'render_home' )
 		);
 
 		add_submenu_page(
@@ -118,6 +128,13 @@ class MBapp_Admin {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current_page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( 'mbapp-home' === $current_page ) {
+			wp_enqueue_media();
+		}
+
 		wp_enqueue_style(
 			'mbapp-admin',
 			MBAPP_PLUGIN_URL . 'assets/css/mbapp-admin.css',
@@ -151,6 +168,9 @@ class MBapp_Admin {
 					'apply'     => __( 'Ezt használom', 'mbapp' ),
 					'applied'   => __( 'A szelektorok kitöltve. Ellenőrizd a „Próbalekérés” gombbal, majd mentsd el!', 'mbapp' ),
 					'useFeed'   => __( 'Beállítom forrásnak', 'mbapp' ),
+					'saving'    => __( 'Mentés…', 'mbapp' ),
+					'saved'     => __( 'Elmentve', 'mbapp' ),
+					'saveError' => __( 'A mentés nem sikerült.', 'mbapp' ),
 				),
 			)
 		);
@@ -165,6 +185,11 @@ class MBapp_Admin {
 	 */
 	public function handle_forms() {
 		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		// Az AJAX mentésnek saját végpontja van, itt nincs dolgunk.
+		if ( wp_doing_ajax() ) {
 			return;
 		}
 
@@ -193,6 +218,14 @@ class MBapp_Admin {
 
 			case 'save_menu':
 				$this->save_menu_settings();
+				break;
+
+			case 'save_home':
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$input = isset( $_POST['mbapp_home'] ) ? (array) wp_unslash( $_POST['mbapp_home'] ) : array();
+
+				MBapp_Settings::save( 'home', $this->sanitize_home( $input ) );
+				$this->redirect( 'mbapp-home', array( 'mbapp_msg' => 'saved' ) );
 				break;
 
 			case 'run_import':
@@ -276,6 +309,21 @@ class MBapp_Admin {
 		$input = isset( $_POST['mbapp_news'] ) ? (array) wp_unslash( $_POST['mbapp_news'] ) : array();
 		// phpcs:enable
 
+		$clean = $this->sanitize_news( $input );
+
+		MBapp_Settings::save( 'news', $clean );
+		$this->apply_news_schedule( $clean );
+
+		$this->redirect( 'mbapp-news', array( 'mbapp_msg' => 'saved' ) );
+	}
+
+	/**
+	 * Hírbeolvasó beállítások fertőtlenítése.
+	 *
+	 * @param array $input Nyers értékek.
+	 * @return array
+	 */
+	private function sanitize_news( array $input ) {
 		$defaults = MBapp_Settings::defaults( 'news' );
 		$clean    = array();
 
@@ -308,9 +356,15 @@ class MBapp_Admin {
 		$clean['user_agent']         = sanitize_text_field( (string) ( $input['user_agent'] ?? '' ) );
 		$clean['log_retention_days'] = min( 3650, max( 1, absint( $input['log_retention_days'] ?? 90 ) ) );
 
-		MBapp_Settings::save( 'news', $clean );
+		return $clean;
+	}
 
-		// Az ütemezést azonnal igazítjuk az új beállításhoz.
+	/**
+	 * Az importálás ütemezésének igazítása a mentett beállításhoz.
+	 *
+	 * @param array $clean Mentett beállítások.
+	 */
+	private function apply_news_schedule( array $clean ) {
 		$timestamp = wp_next_scheduled( MBAPP_CRON_IMPORT );
 
 		if ( $timestamp ) {
@@ -320,8 +374,6 @@ class MBapp_Admin {
 		if ( $clean['enabled'] && 'mbapp_manual' !== $clean['interval'] ) {
 			wp_schedule_event( time() + MINUTE_IN_SECONDS, $clean['interval'], MBAPP_CRON_IMPORT );
 		}
-
-		$this->redirect( 'mbapp-news', array( 'mbapp_msg' => 'saved' ) );
 	}
 
 	/**
@@ -332,6 +384,21 @@ class MBapp_Admin {
 		$input = isset( $_POST['mbapp_events'] ) ? (array) wp_unslash( $_POST['mbapp_events'] ) : array();
 		// phpcs:enable
 
+		$clean = $this->sanitize_events( $input );
+
+		MBapp_Settings::save( 'events', $clean );
+		update_option( 'mbapp_events_page_id', $clean['page_id'] );
+
+		$this->redirect( 'mbapp-events', array( 'mbapp_msg' => 'saved' ) );
+	}
+
+	/**
+	 * Esemény beállítások fertőtlenítése.
+	 *
+	 * @param array $input Nyers értékek.
+	 * @return array
+	 */
+	private function sanitize_events( array $input ) {
 		$defaults = MBapp_Settings::defaults( 'events' );
 		$clean    = array();
 
@@ -348,10 +415,7 @@ class MBapp_Admin {
 		$clean['date_format']    = sanitize_text_field( (string) ( $input['date_format'] ?? $defaults['date_format'] ) );
 		$clean['page_id']        = absint( $input['page_id'] ?? 0 );
 
-		MBapp_Settings::save( 'events', $clean );
-		update_option( 'mbapp_events_page_id', $clean['page_id'] );
-
-		$this->redirect( 'mbapp-events', array( 'mbapp_msg' => 'saved' ) );
+		return $clean;
 	}
 
 	/**
@@ -362,6 +426,18 @@ class MBapp_Admin {
 		$input = isset( $_POST['mbapp_menu'] ) ? (array) wp_unslash( $_POST['mbapp_menu'] ) : array();
 		// phpcs:enable
 
+		MBapp_Settings::save( 'menu', $this->sanitize_menu( $input ) );
+
+		$this->redirect( 'mbapp-menu', array( 'mbapp_msg' => 'saved' ) );
+	}
+
+	/**
+	 * Lebegő menü beállítások fertőtlenítése.
+	 *
+	 * @param array $input Nyers értékek.
+	 * @return array
+	 */
+	private function sanitize_menu( array $input ) {
 		$clean = array();
 
 		$clean['enabled']     = ! empty( $input['enabled'] ) ? 1 : 0;
@@ -371,6 +447,16 @@ class MBapp_Admin {
 		$clean['show_labels'] = ! empty( $input['show_labels'] ) ? 1 : 0;
 		$clean['autohide']    = ! empty( $input['autohide'] ) ? 1 : 0;
 		$clean['style']       = in_array( $input['style'] ?? '', array( 'glass', 'solid' ), true ) ? $input['style'] : 'glass';
+
+		// AJAX navigáció és animációk.
+		$clean['ajax_nav']      = ! empty( $input['ajax_nav'] ) ? 1 : 0;
+		$clean['ajax_scope']    = in_array( $input['ajax_scope'] ?? '', array( 'menu', 'all' ), true ) ? $input['ajax_scope'] : 'menu';
+		$clean['anim_type']     = array_key_exists( $input['anim_type'] ?? '', MBapp_Settings::animations() ) ? $input['anim_type'] : 'slide';
+		$clean['anim_duration'] = min( 900, max( 80, absint( $input['anim_duration'] ?? 280 ) ) );
+		$clean['anim_easing']   = array_key_exists( $input['anim_easing'] ?? '', MBapp_Settings::easings() ) ? $input['anim_easing'] : 'ease-out';
+		$clean['progress_bar']  = ! empty( $input['progress_bar'] ) ? 1 : 0;
+		$clean['tap_effect']    = array_key_exists( $input['tap_effect'] ?? '', MBapp_Settings::tap_effects() ) ? $input['tap_effect'] : 'ripple';
+		$clean['dock_anim']     = array_key_exists( $input['dock_anim'] ?? '', MBapp_Settings::dock_animations() ) ? $input['dock_anim'] : 'slide-up';
 
 		$items    = isset( $input['items'] ) && is_array( $input['items'] ) ? $input['items'] : array();
 		$icon_set = array_keys( mbapp_icon_choices() );
@@ -422,9 +508,153 @@ class MBapp_Admin {
 
 		$clean['items'] = $clean_items;
 
-		MBapp_Settings::save( 'menu', $clean );
+		return $clean;
+	}
 
-		$this->redirect( 'mbapp-menu', array( 'mbapp_msg' => 'saved' ) );
+	/**
+	 * Kezdőlap beállítások fertőtlenítése.
+	 *
+	 * @param array $input Nyers értékek.
+	 * @return array
+	 */
+	private function sanitize_home( array $input ) {
+		$clean = array(
+			'enabled' => ! empty( $input['enabled'] ) ? 1 : 0,
+			'blocks'  => array(),
+		);
+
+		$blocks = isset( $input['blocks'] ) && is_array( $input['blocks'] ) ? $input['blocks'] : array();
+		$types  = MBapp_Settings::block_types();
+
+		foreach ( $blocks as $block ) {
+			$type = isset( $block['type'] ) ? sanitize_key( $block['type'] ) : '';
+
+			if ( ! isset( $types[ $type ] ) ) {
+				continue;
+			}
+
+			$clean_block = array(
+				'type'    => $type,
+				'enabled' => ! empty( $block['enabled'] ) ? 1 : 0,
+				'title'   => sanitize_text_field( (string) ( $block['title'] ?? '' ) ),
+			);
+
+			switch ( $type ) {
+				case 'hero':
+					$clean_block['subtitle']     = sanitize_text_field( (string) ( $block['subtitle'] ?? '' ) );
+					$clean_block['show_image']   = ! empty( $block['show_image'] ) ? 1 : 0;
+					$clean_block['image']        = absint( $block['image'] ?? 0 );
+					$clean_block['height']       = in_array( $block['height'] ?? '', array( 'compact', 'normal', 'tall' ), true )
+						? $block['height']
+						: 'normal';
+					$clean_block['overlay']      = min( 90, max( 0, absint( $block['overlay'] ?? 45 ) ) );
+					$clean_block['align']        = in_array( $block['align'] ?? '', array( 'left', 'center' ), true )
+						? $block['align']
+						: 'left';
+					$clean_block['button_label'] = sanitize_text_field( (string) ( $block['button_label'] ?? '' ) );
+
+					$button_url = trim( (string) ( $block['button_url'] ?? '' ) );
+
+					$clean_block['button_url'] = preg_match( '~^(https?://|//|mailto:|tel:|\#)~i', $button_url )
+						? esc_url_raw( $button_url )
+						: sanitize_text_field( $button_url );
+					break;
+
+				case 'events':
+					$clean_block['limit']    = min( 50, max( 1, absint( $block['limit'] ?? 3 ) ) );
+					$clean_block['layout']   = in_array( $block['layout'] ?? '', array( 'grid', 'list' ), true ) ? $block['layout'] : 'grid';
+					$clean_block['past']     = 'yes' === ( $block['past'] ?? '' ) ? 'yes' : 'no';
+					$clean_block['loadmore'] = 'yes' === ( $block['loadmore'] ?? '' ) ? 'yes' : 'no';
+					$clean_block['link']     = ! empty( $block['link'] ) ? 1 : 0;
+					break;
+
+				case 'news':
+					$clean_block['limit']  = min( 50, max( 1, absint( $block['limit'] ?? 6 ) ) );
+					$clean_block['layout'] = in_array( $block['layout'] ?? '', array( 'grid', 'list' ), true ) ? $block['layout'] : 'grid';
+					$clean_block['link']   = ! empty( $block['link'] ) ? 1 : 0;
+					break;
+
+				case 'html':
+					// Ugyanaz a szabály, mint a bejegyzéseknél: akinek van
+					// unfiltered_html joga, nyers HTML-t is menthet, mindenki
+					// másnál a wp_kses_post szűri a tartalmat.
+					$content = (string) ( $block['content'] ?? '' );
+
+					$clean_block['content'] = current_user_can( 'unfiltered_html' )
+						? $content
+						: wp_kses_post( $content );
+					$clean_block['run_shortcodes'] = ! empty( $block['run_shortcodes'] ) ? 1 : 0;
+					$clean_block['boxed']          = ! empty( $block['boxed'] ) ? 1 : 0;
+					break;
+
+				case 'page':
+					$clean_block['page_id'] = absint( $block['page_id'] ?? 0 );
+					$clean_block['boxed']   = ! empty( $block['boxed'] ) ? 1 : 0;
+					break;
+			}
+
+			$clean['blocks'][] = $clean_block;
+		}
+
+		return $clean;
+	}
+
+	/**
+	 * AJAX mentés: az oldal nem töltődik újra, nem ugrik a tetejére.
+	 */
+	public function ajax_save() {
+		check_ajax_referer( 'mbapp_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Nincs jogosultságod ehhez.', 'mbapp' ) ), 403 );
+		}
+
+		$group = isset( $_POST['group'] ) ? sanitize_key( wp_unslash( $_POST['group'] ) ) : '';
+
+		switch ( $group ) {
+			case 'news':
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$input = isset( $_POST['mbapp_news'] ) ? (array) wp_unslash( $_POST['mbapp_news'] ) : array();
+				$clean = $this->sanitize_news( $input );
+
+				MBapp_Settings::save( 'news', $clean );
+				$this->apply_news_schedule( $clean );
+				break;
+
+			case 'events':
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$input = isset( $_POST['mbapp_events'] ) ? (array) wp_unslash( $_POST['mbapp_events'] ) : array();
+				$clean = $this->sanitize_events( $input );
+
+				MBapp_Settings::save( 'events', $clean );
+				update_option( 'mbapp_events_page_id', $clean['page_id'] );
+				break;
+
+			case 'menu':
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$input = isset( $_POST['mbapp_menu'] ) ? (array) wp_unslash( $_POST['mbapp_menu'] ) : array();
+				$clean = $this->sanitize_menu( $input );
+
+				MBapp_Settings::save( 'menu', $clean );
+				break;
+
+			case 'home':
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$input = isset( $_POST['mbapp_home'] ) ? (array) wp_unslash( $_POST['mbapp_home'] ) : array();
+
+				MBapp_Settings::save( 'home', $this->sanitize_home( $input ) );
+				break;
+
+			default:
+				wp_send_json_error( array( 'message' => __( 'Ismeretlen beállításcsoport.', 'mbapp' ) ), 400 );
+		}
+
+		wp_send_json_success(
+			array(
+				'message' => __( 'Elmentve', 'mbapp' ),
+				'time'    => wp_date( 'H:i:s' ),
+			)
+		);
 	}
 
 	/* =====================================================================
@@ -593,6 +823,9 @@ class MBapp_Admin {
 					<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=mbapp-news' ) ); ?>">
 						<?php esc_html_e( 'Beállítások', 'mbapp' ); ?>
 					</a>
+					<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=mbapp-home' ) ); ?>">
+						<?php esc_html_e( 'Kezdőlap szerkesztése', 'mbapp' ); ?>
+					</a>
 				</form>
 			</div>
 
@@ -622,6 +855,288 @@ class MBapp_Admin {
 	}
 
 	/**
+	 * Kezdőlap szerkesztő.
+	 */
+	public function render_home() {
+		$s      = MBapp_Settings::all( 'home' );
+		$blocks = ! empty( $s['blocks'] ) && is_array( $s['blocks'] ) ? $s['blocks'] : array();
+		$types  = MBapp_Settings::block_types();
+		?>
+		<div class="wrap mbapp-admin">
+			<h1><?php esc_html_e( 'Kezdőlap', 'mbapp' ); ?></h1>
+			<?php $this->notices(); ?>
+
+			<p class="description">
+				<?php esc_html_e( 'A kezdőlap blokkokból épül fel. Bármelyiket ki-be kapcsolhatod, húzással átrendezheted, és újakat is hozzáadhatsz – fejlécképet, híreket, eseményeket vagy saját HTML tartalmat.', 'mbapp' ); ?>
+			</p>
+
+			<form method="post" class="mbapp-form" data-mbapp-group="home">
+				<?php wp_nonce_field( 'mbapp_save_home', 'mbapp_nonce' ); ?>
+				<input type="hidden" name="mbapp_action" value="save_home">
+
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Egyedi kezdőlap', 'mbapp' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="mbapp_home[enabled]" value="1" <?php checked( $s['enabled'], 1 ); ?>>
+								<?php esc_html_e( 'A bővítmény állítsa össze a kezdőlapot az alábbi blokkokból', 'mbapp' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'Kikapcsolva a téma alapértelmezett kezdőlapja jelenik meg (a statikus kezdőlap tartalma, alatta az eseményekkel és a hírekkel).', 'mbapp' ); ?>
+							</p>
+						</td>
+					</tr>
+				</table>
+
+				<h2 class="title"><?php esc_html_e( 'Blokkok', 'mbapp' ); ?></h2>
+
+				<div id="mbapp-home-blocks" class="mbapp-items" data-mbapp-repeater="blocks">
+					<?php
+					$index = 0;
+
+					foreach ( $blocks as $block ) {
+						$this->render_home_block( $index, $block );
+						$index++;
+					}
+					?>
+				</div>
+
+				<p class="mbapp-addblock">
+					<select id="mbapp-block-type">
+						<?php foreach ( $types as $key => $label ) : ?>
+							<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<button type="button" class="button" id="mbapp-add-block"><?php esc_html_e( '+ Blokk hozzáadása', 'mbapp' ); ?></button>
+				</p>
+
+				<?php submit_button( __( 'Kezdőlap mentése', 'mbapp' ) ); ?>
+			</form>
+
+			<?php foreach ( array_keys( $types ) as $type ) : ?>
+				<script type="text/html" id="tmpl-mbapp-block-<?php echo esc_attr( $type ); ?>">
+					<?php $this->render_home_block( '__INDEX__', array( 'type' => $type ) ); ?>
+				</script>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Egy kezdőlap blokk szerkesztő sora.
+	 *
+	 * @param int|string $index Index.
+	 * @param array      $block Blokk.
+	 */
+	private function render_home_block( $index, array $block ) {
+		$type = isset( $block['type'] ) ? $block['type'] : 'html';
+
+		$defaults = array(
+			'enabled'        => 1,
+			'title'          => '',
+			'subtitle'       => '',
+			'show_image'     => 0,
+			'image'          => 0,
+			'height'         => 'normal',
+			'overlay'        => 45,
+			'align'          => 'left',
+			'button_label'   => '',
+			'button_url'     => '',
+			'limit'          => 'events' === $type ? 3 : 6,
+			'layout'         => 'grid',
+			'past'           => 'no',
+			'loadmore'       => 'no',
+			'link'           => 1,
+			'content'        => '',
+			'run_shortcodes' => 1,
+			'boxed'          => 1,
+			'page_id'        => 0,
+		);
+
+		$block  = wp_parse_args( $block, $defaults );
+		$name   = 'mbapp_home[blocks][' . $index . ']';
+		$types  = MBapp_Settings::block_types();
+		$label  = isset( $types[ $type ] ) ? $types[ $type ] : $type;
+		$icons  = array(
+			'hero'   => 'gallery',
+			'events' => 'calendar',
+			'news'   => 'news',
+			'html'   => 'doc',
+			'page'   => 'doc',
+		);
+		?>
+		<div class="mbapp-item mbapp-block mbapp-block--<?php echo esc_attr( $type ); ?>" data-index="<?php echo esc_attr( $index ); ?>">
+			<div class="mbapp-item__handle" title="<?php esc_attr_e( 'Húzd a sorrend módosításához', 'mbapp' ); ?>">⠿</div>
+
+			<div class="mbapp-item__preview">
+				<span class="mbapp-item__icon">
+					<?php echo mbapp_icon( isset( $icons[ $type ] ) ? $icons[ $type ] : 'doc' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</span>
+			</div>
+
+			<div class="mbapp-item__fields">
+				<input type="hidden" name="<?php echo esc_attr( $name ); ?>[type]" value="<?php echo esc_attr( $type ); ?>">
+
+				<p class="mbapp-block__label"><strong><?php echo esc_html( $label ); ?></strong></p>
+
+				<label class="mbapp-field">
+					<span><?php esc_html_e( 'Cím a blokk fölött', 'mbapp' ); ?></span>
+					<input type="text" name="<?php echo esc_attr( $name ); ?>[title]" value="<?php echo esc_attr( $block['title'] ); ?>">
+				</label>
+
+				<?php if ( 'hero' === $type ) : ?>
+					<label class="mbapp-field">
+						<span><?php esc_html_e( 'Alcím', 'mbapp' ); ?></span>
+						<input type="text" name="<?php echo esc_attr( $name ); ?>[subtitle]" value="<?php echo esc_attr( $block['subtitle'] ); ?>">
+					</label>
+
+					<div class="mbapp-field mbapp-field--full">
+						<span><?php esc_html_e( 'Fejléc kép', 'mbapp' ); ?></span>
+						<div class="mbapp-media">
+							<label class="mbapp-media__toggle">
+								<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[show_image]" value="1" <?php checked( $block['show_image'], 1 ); ?>>
+								<?php esc_html_e( 'Háttérkép megjelenítése', 'mbapp' ); ?>
+							</label>
+
+							<div class="mbapp-media__row">
+								<span class="mbapp-media__thumb">
+									<?php
+									$image_url = $block['image'] ? wp_get_attachment_image_url( (int) $block['image'], 'medium' ) : '';
+
+									if ( $image_url ) {
+										printf( '<img src="%s" alt="">', esc_url( $image_url ) );
+									}
+									?>
+								</span>
+								<input type="hidden" class="mbapp-media__id" name="<?php echo esc_attr( $name ); ?>[image]" value="<?php echo esc_attr( $block['image'] ); ?>">
+								<button type="button" class="button mbapp-media__pick"><?php esc_html_e( 'Kép kiválasztása', 'mbapp' ); ?></button>
+								<button type="button" class="button-link mbapp-media__clear"><?php esc_html_e( 'Törlés', 'mbapp' ); ?></button>
+							</div>
+						</div>
+					</div>
+
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Magasság', 'mbapp' ); ?></span>
+						<select name="<?php echo esc_attr( $name ); ?>[height]">
+							<option value="compact" <?php selected( $block['height'], 'compact' ); ?>><?php esc_html_e( 'Alacsony', 'mbapp' ); ?></option>
+							<option value="normal" <?php selected( $block['height'], 'normal' ); ?>><?php esc_html_e( 'Közepes', 'mbapp' ); ?></option>
+							<option value="tall" <?php selected( $block['height'], 'tall' ); ?>><?php esc_html_e( 'Magas', 'mbapp' ); ?></option>
+						</select>
+					</label>
+
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Kép sötétítése', 'mbapp' ); ?></span>
+						<input type="number" name="<?php echo esc_attr( $name ); ?>[overlay]" min="0" max="90" step="5" value="<?php echo esc_attr( $block['overlay'] ); ?>">
+					</label>
+
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Igazítás', 'mbapp' ); ?></span>
+						<select name="<?php echo esc_attr( $name ); ?>[align]">
+							<option value="left" <?php selected( $block['align'], 'left' ); ?>><?php esc_html_e( 'Balra', 'mbapp' ); ?></option>
+							<option value="center" <?php selected( $block['align'], 'center' ); ?>><?php esc_html_e( 'Középre', 'mbapp' ); ?></option>
+						</select>
+					</label>
+
+					<label class="mbapp-field">
+						<span><?php esc_html_e( 'Gomb felirata', 'mbapp' ); ?></span>
+						<input type="text" name="<?php echo esc_attr( $name ); ?>[button_label]" value="<?php echo esc_attr( $block['button_label'] ); ?>">
+					</label>
+
+					<label class="mbapp-field">
+						<span><?php esc_html_e( 'Gomb URL', 'mbapp' ); ?></span>
+						<input type="text" name="<?php echo esc_attr( $name ); ?>[button_url]" value="<?php echo esc_attr( $block['button_url'] ); ?>" placeholder="/esemenyek/">
+					</label>
+				<?php endif; ?>
+
+				<?php if ( 'events' === $type || 'news' === $type ) : ?>
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Hány elem', 'mbapp' ); ?></span>
+						<input type="number" name="<?php echo esc_attr( $name ); ?>[limit]" min="1" max="50" value="<?php echo esc_attr( $block['limit'] ); ?>">
+					</label>
+
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Elrendezés', 'mbapp' ); ?></span>
+						<select name="<?php echo esc_attr( $name ); ?>[layout]">
+							<option value="grid" <?php selected( $block['layout'], 'grid' ); ?>><?php esc_html_e( 'Rács', 'mbapp' ); ?></option>
+							<option value="list" <?php selected( $block['layout'], 'list' ); ?>><?php esc_html_e( 'Felsorolás', 'mbapp' ); ?></option>
+						</select>
+					</label>
+
+					<div class="mbapp-item__checks">
+						<label>
+							<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[link]" value="1" <?php checked( $block['link'], 1 ); ?>>
+							<?php esc_html_e( '„Összes” link a blokk fejlécében', 'mbapp' ); ?>
+						</label>
+
+						<?php if ( 'events' === $type ) : ?>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[past]" value="yes" <?php checked( $block['past'], 'yes' ); ?>>
+								<?php esc_html_e( 'Véget ért események is', 'mbapp' ); ?>
+							</label>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[loadmore]" value="yes" <?php checked( $block['loadmore'], 'yes' ); ?>>
+								<?php esc_html_e( '„További” gomb', 'mbapp' ); ?>
+							</label>
+						<?php endif; ?>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( 'html' === $type ) : ?>
+					<label class="mbapp-field mbapp-field--full">
+						<span><?php esc_html_e( 'Tartalom (HTML)', 'mbapp' ); ?></span>
+						<textarea name="<?php echo esc_attr( $name ); ?>[content]" rows="7" class="code"><?php echo esc_textarea( $block['content'] ); ?></textarea>
+					</label>
+
+					<div class="mbapp-item__checks">
+						<label>
+							<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[run_shortcodes]" value="1" <?php checked( $block['run_shortcodes'], 1 ); ?>>
+							<?php esc_html_e( 'Shortcode-ok futtatása a tartalomban', 'mbapp' ); ?>
+						</label>
+						<label>
+							<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[boxed]" value="1" <?php checked( $block['boxed'], 1 ); ?>>
+							<?php esc_html_e( 'Kártyás keretben', 'mbapp' ); ?>
+						</label>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( 'page' === $type ) : ?>
+					<label class="mbapp-field">
+						<span><?php esc_html_e( 'Melyik oldal', 'mbapp' ); ?></span>
+						<?php
+						wp_dropdown_pages(
+							array(
+								'name'              => $name . '[page_id]',
+								'selected'          => (int) $block['page_id'],
+								'show_option_none'  => __( '— válassz —', 'mbapp' ),
+								'option_none_value' => 0,
+							)
+						);
+						?>
+					</label>
+
+					<div class="mbapp-item__checks">
+						<label>
+							<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[boxed]" value="1" <?php checked( $block['boxed'], 1 ); ?>>
+							<?php esc_html_e( 'Kártyás keretben', 'mbapp' ); ?>
+						</label>
+					</div>
+				<?php endif; ?>
+
+				<div class="mbapp-item__checks">
+					<label>
+						<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[enabled]" value="1" <?php checked( $block['enabled'], 1 ); ?>>
+						<?php esc_html_e( 'Megjelenik a kezdőlapon', 'mbapp' ); ?>
+					</label>
+				</div>
+			</div>
+
+			<button type="button" class="button-link mbapp-item__remove" aria-label="<?php esc_attr_e( 'Blokk törlése', 'mbapp' ); ?>">✕</button>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Hírbeolvasó beállítások.
 	 */
 	public function render_news() {
@@ -635,7 +1150,7 @@ class MBapp_Admin {
 				<?php esc_html_e( 'A bővítmény a megadott forrásoldalról olvassa be a híreket – címmel, szöveggel, képpel és dátummal együtt –, majd a tartalom végére illeszti a forrás gombot. Minden lépés naplózásra kerül.', 'mbapp' ); ?>
 			</p>
 
-			<form method="post" class="mbapp-form">
+			<form method="post" class="mbapp-form" data-mbapp-group="news">
 				<?php wp_nonce_field( 'mbapp_save_news', 'mbapp_nonce' ); ?>
 				<input type="hidden" name="mbapp_action" value="save_news">
 
@@ -881,7 +1396,7 @@ class MBapp_Admin {
 			<h1><?php esc_html_e( 'Esemény beállítások', 'mbapp' ); ?></h1>
 			<?php $this->notices(); ?>
 
-			<form method="post" class="mbapp-form">
+			<form method="post" class="mbapp-form" data-mbapp-group="events">
 				<?php wp_nonce_field( 'mbapp_save_events', 'mbapp_nonce' ); ?>
 				<input type="hidden" name="mbapp_action" value="save_events">
 
@@ -1070,7 +1585,7 @@ class MBapp_Admin {
 				<?php esc_html_e( 'Itt állítod be, hogyan néz ki a webapp lebegő menüje: milyen gombok legyenek benne, milyen ikonnal és milyen URL-re mutassanak.', 'mbapp' ); ?>
 			</p>
 
-			<form method="post" class="mbapp-form" id="mbapp-menu-form">
+			<form method="post" class="mbapp-form" id="mbapp-menu-form" data-mbapp-group="menu">
 				<?php wp_nonce_field( 'mbapp_save_menu', 'mbapp_nonce' ); ?>
 				<input type="hidden" name="mbapp_action" value="save_menu">
 
@@ -1120,6 +1635,115 @@ class MBapp_Admin {
 								<input type="checkbox" name="mbapp_menu[autohide]" value="1" <?php checked( $s['autohide'], 1 ); ?>>
 								<?php esc_html_e( 'Lefelé görgetéskor rejtse el a menüt (mobilon)', 'mbapp' ); ?>
 							</label>
+						</td>
+					</tr>
+				</table>
+
+				<h2 class="title"><?php esc_html_e( 'AJAX navigáció és animációk', 'mbapp' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'Bekapcsolva az oldalak újratöltés nélkül, animálva váltanak – ettől viselkedik a felület igazi mobilalkalmazásként.', 'mbapp' ); ?>
+				</p>
+
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'AJAX oldalváltás', 'mbapp' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="mbapp_menu[ajax_nav]" value="1" <?php checked( $s['ajax_nav'], 1 ); ?>>
+								<?php esc_html_e( 'Az oldalak újratöltés nélkül töltődjenek be', 'mbapp' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Ha a böngésző nem támogatja, vagy hiba történik, a felület automatikusan a hagyományos oldalbetöltésre vált vissza.', 'mbapp' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="mbapp_ajax_scope"><?php esc_html_e( 'Mire vonatkozzon', 'mbapp' ); ?></label></th>
+						<td>
+							<select id="mbapp_ajax_scope" name="mbapp_menu[ajax_scope]">
+								<option value="menu" <?php selected( $s['ajax_scope'], 'menu' ); ?>><?php esc_html_e( 'Csak a lebegő menü gombjaira', 'mbapp' ); ?></option>
+								<option value="all" <?php selected( $s['ajax_scope'], 'all' ); ?>><?php esc_html_e( 'Minden oldalon belüli hivatkozásra', 'mbapp' ); ?></option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="mbapp_anim_type"><?php esc_html_e( 'Oldalátmenet', 'mbapp' ); ?></label></th>
+						<td>
+							<select id="mbapp_anim_type" name="mbapp_menu[anim_type]" class="mbapp-anim-control">
+								<?php foreach ( MBapp_Settings::animations() as $key => $label ) : ?>
+									<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['anim_type'], $key ); ?>>
+										<?php echo esc_html( $label ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="mbapp_anim_duration"><?php esc_html_e( 'Animáció hossza', 'mbapp' ); ?></label></th>
+						<td>
+							<input type="number" id="mbapp_anim_duration" name="mbapp_menu[anim_duration]" class="small-text mbapp-anim-control"
+								min="80" max="900" step="10" value="<?php echo esc_attr( $s['anim_duration'] ); ?>">
+							<?php esc_html_e( 'ezredmásodperc', 'mbapp' ); ?>
+							<p class="description"><?php esc_html_e( '200–350 ezredmásodperc között érzi a legtöbb ember gyorsnak és mégis simának.', 'mbapp' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="mbapp_anim_easing"><?php esc_html_e( 'Időzítési görbe', 'mbapp' ); ?></label></th>
+						<td>
+							<select id="mbapp_anim_easing" name="mbapp_menu[anim_easing]" class="mbapp-anim-control">
+								<?php foreach ( MBapp_Settings::easings() as $key => $label ) : ?>
+									<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['anim_easing'], $key ); ?>>
+										<?php echo esc_html( $label ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Próba', 'mbapp' ); ?></th>
+						<td>
+							<div class="mbapp-anim-demo">
+								<div class="mbapp-anim-demo__screen">
+									<div class="mbapp-anim-demo__page" id="mbapp-anim-demo-page">
+										<span class="mbapp-anim-demo__bar"></span>
+										<span class="mbapp-anim-demo__bar mbapp-anim-demo__bar--short"></span>
+										<span class="mbapp-anim-demo__block"></span>
+									</div>
+								</div>
+								<button type="button" class="button" id="mbapp-anim-preview"><?php esc_html_e( 'Animáció lejátszása', 'mbapp' ); ?></button>
+							</div>
+							<p class="description"><?php esc_html_e( 'Így fog váltani a tartalom a beállított értékekkel.', 'mbapp' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Betöltésjelző', 'mbapp' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="mbapp_menu[progress_bar]" value="1" <?php checked( $s['progress_bar'], 1 ); ?>>
+								<?php esc_html_e( 'Vékony folyamatjelző csík a képernyő tetején betöltés közben', 'mbapp' ); ?>
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="mbapp_tap_effect"><?php esc_html_e( 'Gombnyomás visszajelzése', 'mbapp' ); ?></label></th>
+						<td>
+							<select id="mbapp_tap_effect" name="mbapp_menu[tap_effect]">
+								<?php foreach ( MBapp_Settings::tap_effects() as $key => $label ) : ?>
+									<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['tap_effect'], $key ); ?>>
+										<?php echo esc_html( $label ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="mbapp_dock_anim"><?php esc_html_e( 'A menü megjelenése', 'mbapp' ); ?></label></th>
+						<td>
+							<select id="mbapp_dock_anim" name="mbapp_menu[dock_anim]">
+								<?php foreach ( MBapp_Settings::dock_animations() as $key => $label ) : ?>
+									<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['dock_anim'], $key ); ?>>
+										<?php echo esc_html( $label ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
 						</td>
 					</tr>
 				</table>

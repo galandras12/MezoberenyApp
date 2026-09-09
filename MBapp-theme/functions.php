@@ -54,11 +54,21 @@ function mbapp_theme_assets() {
 	$accent   = mbapp_theme_get_option( 'accent_color', '#1f6feb' );
 	$accent_2 = mbapp_theme_get_option( 'accent_color_2', '#17b3a3' );
 
+	$widths = array(
+		'phone'   => '560px',
+		'compact' => '720px',
+		'wide'    => '1080px',
+	);
+
+	$width_key = mbapp_theme_get_option( 'app_width', 'compact' );
+	$width     = isset( $widths[ $width_key ] ) ? $widths[ $width_key ] : $widths['compact'];
+
 	$custom = sprintf(
-		':root{--mb-accent:%1$s;--mb-accent-2:%2$s;--mb-accent-contrast:%3$s;}',
+		':root{--mb-accent:%1$s;--mb-accent-2:%2$s;--mb-accent-contrast:%3$s;--mb-content-max:%4$s;}',
 		esc_attr( $accent ),
 		esc_attr( $accent_2 ),
-		esc_attr( mbapp_theme_contrast_color( $accent ) )
+		esc_attr( mbapp_theme_contrast_color( $accent ) ),
+		esc_attr( $width )
 	);
 
 	wp_add_inline_style( 'mbapp-theme', $custom );
@@ -105,18 +115,7 @@ add_action( 'wp_head', 'mbapp_theme_no_flash_script', 1 );
  * Widget területek.
  */
 function mbapp_theme_widgets_init() {
-	register_sidebar(
-		array(
-			'name'          => __( 'Oldalsáv', 'mbapp-theme' ),
-			'id'            => 'sidebar-1',
-			'description'   => __( 'Az archívum és a bejegyzés oldalak oldalsávja (asztali nézetben).', 'mbapp-theme' ),
-			'before_widget' => '<section id="%1$s" class="mb-widget %2$s">',
-			'after_widget'  => '</section>',
-			'before_title'  => '<h2 class="widget-title">',
-			'after_title'   => '</h2>',
-		)
-	);
-
+	// Oldalsáv szándékosan nincs: az app felület minden oldalon egyhasábos.
 	register_sidebar(
 		array(
 			'name'          => __( 'Lábléc', 'mbapp-theme' ),
@@ -152,10 +151,8 @@ add_filter( 'excerpt_more', 'mbapp_theme_excerpt_more' );
  */
 function mbapp_theme_body_classes( $classes ) {
 	$classes[] = 'mb-body';
-
-	if ( ! is_active_sidebar( 'sidebar-1' ) ) {
-		$classes[] = 'mb-no-sidebar';
-	}
+	$classes[] = 'mb-app-shell';
+	$classes[] = 'mb-width-' . mbapp_theme_get_option( 'app_width', 'compact' );
 
 	if ( mbapp_theme_has_plugin() ) {
 		$classes[] = 'mb-has-plugin';

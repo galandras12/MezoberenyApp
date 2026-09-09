@@ -27,6 +27,7 @@ function mbapp_theme_icon( $name, $size = 22 ) {
 		'user'     => '<circle cx="12" cy="8.2" r="3.8"/><path d="M4.8 20.2a7.2 7.2 0 0 1 14.4 0"/>',
 		'menu'     => '<path d="M4 7h16M4 12h16M4 17h16"/>',
 		'arrow'    => '<path d="M5 12h14M13 6l6 6-6 6"/>',
+		'back'     => '<path d="M19 12H5M11 18l-6-6 6-6"/>',
 		'external' => '<path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 14v5.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 19.5v-11A1.5 1.5 0 0 1 5.5 7H11"/>',
 		'clock'    => '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/>',
 		'info'     => '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/>',
@@ -54,6 +55,25 @@ function mbapp_theme_icon( $name, $size = 22 ) {
  */
 function mbapp_theme_the_icon( $name, $size = 22 ) {
 	echo mbapp_theme_icon( $name, $size ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
+/**
+ * A vissza gomb célja, ha nincs böngésző-előzmény.
+ *
+ * @return string
+ */
+function mbapp_theme_back_url() {
+	if ( is_singular() && ! is_front_page() ) {
+		$post_type = get_post_type();
+
+		$archive = get_post_type_archive_link( $post_type );
+
+		if ( $archive ) {
+			return $archive;
+		}
+	}
+
+	return home_url( '/' );
 }
 
 /**

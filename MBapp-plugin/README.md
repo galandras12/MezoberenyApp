@@ -23,6 +23,7 @@ MBapp-plugin/
 │   ├── class-mbapp-news-importer.php  RSS és HTML beolvasó
 │   ├── class-mbapp-events.php         esemény mezők, lekérdezések, takarítás
 │   ├── class-mbapp-shortcodes.php     [mbapp_events], [mbapp_news], [mbapp_source]
+│   ├── class-mbapp-front-page.php     testreszabható kezdőlap (blokkok)
 │   ├── class-mbapp-floating-menu.php  lebegő menü megjelenítése
 │   ├── class-mbapp-ajax.php           „További” gomb, próbalekérés
 │   ├── class-mbapp-cron.php           ütemezések
@@ -35,6 +36,7 @@ MBapp-plugin/
 ## Admin menü
 
 * **MBapp → Áttekintés** – állapot, utolsó és következő futás, kézi import, shortcode súgó
+* **MBapp → Kezdőlap** – a főoldal blokkjai: fejléc kép, hírek, események, saját HTML
 * **MBapp → Hírek / Események** – a tartalmak kezelése
 * **MBapp → Hírbeolvasó** – forrás, szerkezetfelismerés, szelektorok, próbalekérés, import beállítások
 * **MBapp → Import napló** – naplózott futások, szűrés, keresés, törlés

@@ -497,14 +497,23 @@ textarea { width: 100%; }
 	background: rgba(255, 255, 255, .14);
 }
 
-.mb-grid {
+/* Az app felület alapból egyhasábos, mint egy telefonos alkalmazás.
+   Több hasáb csak a „Széles” tartalomszélesség mellett, nagy kijelzőn. */
+.mb-grid,
+.mb-feed {
 	display: grid;
 	gap: var(--mb-space-4);
 	grid-template-columns: 1fr;
 }
-@media (min-width: 620px)  { .mb-grid--2 { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 620px)  { .mb-grid--3 { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 960px)  { .mb-grid--3 { grid-template-columns: repeat(3, 1fr); } }
+
+@media (min-width: 820px) {
+	.mb-width-wide .mb-grid--2,
+	.mb-width-wide .mb-feed { grid-template-columns: repeat(2, 1fr); }
+	.mb-width-wide .mb-grid--3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1060px) {
+	.mb-width-wide .mb-grid--3 { grid-template-columns: repeat(3, 1fr); }
+}
 
 .mb-card {
 	position: relative;
@@ -864,13 +873,54 @@ textarea { width: 100%; }
 }
 
 /* --------------------------------------------------------------------------
-   11. Oldalsáv / widgetek
+   11. App váz: vissza gomb, bejegyzés navigáció, widgetek a láblécben
    -------------------------------------------------------------------------- */
-.mb-layout { display: grid; gap: var(--mb-space-5); grid-template-columns: 1fr; }
-@media (min-width: 1000px) {
-	.mb-layout--sidebar { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
-	.mb-sidebar { position: sticky; top: calc(var(--mb-appbar-h) + var(--mb-space-4)); }
+
+/* Vissza gomb – mobilalkalmazás szerű fejléc.
+   A kezdőlapon elrejtjük: így AJAX navigáció után is helyes marad,
+   mert a body osztályai oldalanként frissülnek. */
+.mb-back {
+	flex: 0 0 auto;
+	margin-right: calc(var(--mb-space-1) * -1);
 }
+.home .mb-back { display: none; }
+
+/* Előző / következő bejegyzés – app stílusú sorok */
+.mb-postnav {
+	display: grid;
+	gap: var(--mb-space-3);
+	margin-top: var(--mb-space-5);
+}
+
+.mb-postnav__link {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: var(--mb-space-4);
+	background: var(--mb-surface);
+	border: 1px solid var(--mb-border);
+	border-radius: var(--mb-radius);
+	box-shadow: var(--mb-shadow-1);
+	color: inherit;
+	text-decoration: none;
+	transition: transform var(--mb-dur) var(--mb-ease), box-shadow var(--mb-dur) var(--mb-ease);
+}
+.mb-postnav__link:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--mb-shadow-2);
+	text-decoration: none;
+}
+.mb-postnav__link--next { text-align: right; }
+
+.mb-postnav__label {
+	font-size: .74rem;
+	font-weight: 700;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	color: var(--mb-text-3);
+}
+.mb-postnav__title { font-weight: 600; line-height: 1.35; }
+
 .mb-widget {
 	background: var(--mb-surface);
 	border: 1px solid var(--mb-border);
@@ -890,14 +940,16 @@ textarea { width: 100%; }
 @media (min-width: 768px) {
 	:root { --mb-appbar-h: 66px; }
 	.mb-container { padding-inline: var(--mb-space-5); }
-	.mb-dock { width: min(620px, calc(100% - 48px)); }
+	.mb-dock { width: min(var(--mb-content-max), calc(100% - 48px)); }
 	.mb-dock__item { font-size: .74rem; }
 }
 
 @media (min-width: 1100px) {
-	:root { --mb-content-max: 1180px; }
 	body { font-size: 16.5px; }
 }
+
+/* A lebegő menü igazodjon a tartalom hasábjához, hogy egy appot idézzen */
+.mb-dock { width: min(var(--mb-content-max), calc(100% - 24px)); }
 
 /* Görgetéskor elrejtjük a docköt mobilon (JS állítja a .is-hidden osztályt) */
 @media (min-width: 1100px) {

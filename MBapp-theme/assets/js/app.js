@@ -181,12 +181,36 @@
 	}
 
 	/* ------------------------------------------------------------------
+	 * Vissza gomb – app szerű viselkedés
+	 * ------------------------------------------------------------------ */
+	function initBack() {
+		var back = document.querySelector('[data-mb-back]');
+
+		if (!back) {
+			return;
+		}
+
+		back.addEventListener('click', function (event) {
+			// Ha van hova visszalépni ezen az oldalon belül, azt használjuk.
+			var sameOrigin = document.referrer && document.referrer.indexOf(window.location.origin) === 0;
+			var navigated = document.body.dataset.mbappNavigated === '1';
+
+			if ((sameOrigin || navigated) && window.history.length > 1) {
+				event.preventDefault();
+				window.history.back();
+			}
+			// Egyébként marad a href (archívum vagy kezdőlap).
+		});
+	}
+
+	/* ------------------------------------------------------------------
 	 * Indítás
 	 * ------------------------------------------------------------------ */
 	function init() {
 		initThemeToggle();
 		initSearch();
 		initDock();
+		initBack();
 	}
 
 	if (document.readyState === 'loading') {
@@ -194,4 +218,10 @@
 	} else {
 		init();
 	}
+
+	// AJAX navigáció után az app bar, a lebegő menü és a lábléc a helyén marad,
+	// ezért nincs mit újra bekötni – csak jelezzük, hogy már léptünk oldalt.
+	document.addEventListener('mbapp:navigated', function () {
+		document.body.dataset.mbappNavigated = '1';
+	});
 })();

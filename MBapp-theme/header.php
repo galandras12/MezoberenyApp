@@ -25,6 +25,14 @@ defined( 'ABSPATH' ) || exit;
 
 	<header class="mb-appbar" role="banner">
 		<div class="mb-appbar__inner">
+			<?php if ( mbapp_theme_get_option( 'show_back', true ) ) : ?>
+				<a class="mb-iconbtn mb-back" href="<?php echo esc_url( mbapp_theme_back_url() ); ?>"
+					data-mb-back
+					aria-label="<?php esc_attr_e( 'Vissza', 'mbapp-theme' ); ?>">
+					<?php mbapp_theme_the_icon( 'back' ); ?>
+				</a>
+			<?php endif; ?>
+
 			<?php mbapp_theme_brand(); ?>
 
 			<span class="mb-appbar__spacer"></span>
@@ -59,5 +67,5 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 	</header>
 
-	<main class="mb-main" id="mb-content" role="main">
+	<main class="mb-main" id="mb-content" role="main" data-mbapp-view>
 		<div class="mb-container">

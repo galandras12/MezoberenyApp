@@ -1,9 +1,10 @@
 <?php
 /**
- * Kezdőlap – app stílusú indítófelület.
+ * Kezdőlap.
  *
- * Ha statikus kezdőlapot állítottál be, annak a tartalma jelenik meg,
- * alatta a legfrissebb hírekkel és a közelgő eseményekkel.
+ * Ha az MBapp Plugin egyedi kezdőlapja be van kapcsolva, azt rajzoljuk ki
+ * (MBapp → Kezdőlap). Egyébként marad a téma alapértelmezett felépítése:
+ * a statikus kezdőlap tartalma, alatta a közelgő eseményekkel és a hírekkel.
  *
  * @package MBapp_Theme
  */
@@ -12,15 +13,22 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-$has_static_front = 'page' === get_option( 'show_on_front' ) && is_page();
-?>
+// 1. A bővítmény testreszabható kezdőlapja.
+if ( function_exists( 'mbapp_render_front_page' ) && mbapp_render_front_page() ) {
+	get_footer();
 
-<?php if ( $has_static_front ) : ?>
-	<?php
+	return;
+}
+
+// 2. Tartalék: a téma saját kezdőlapja.
+$has_static_front = 'page' === get_option( 'show_on_front' ) && is_page();
+
+if ( $has_static_front ) :
 	while ( have_posts() ) :
 		the_post();
 
 		$content = trim( get_the_content() );
+
 		if ( $content ) :
 			?>
 			<article class="mb-entry mb-section">
@@ -38,15 +46,15 @@ $has_static_front = 'page' === get_option( 'show_on_front' ) && is_page();
 			<?php
 		endif;
 	endwhile;
+else :
 	?>
-<?php else : ?>
 	<section class="mb-hero">
 		<h1><?php bloginfo( 'name' ); ?></h1>
 		<p><?php echo esc_html( get_bloginfo( 'description' ) ); ?></p>
 	</section>
-<?php endif; ?>
+	<?php
+endif;
 
-<?php
 // Közelgő események – csak ha az MBapp Plugin aktív.
 if ( shortcode_exists( 'mbapp_events' ) ) :
 	?>
@@ -55,6 +63,7 @@ if ( shortcode_exists( 'mbapp_events' ) ) :
 			<h2 class="mb-section__title"><?php esc_html_e( 'Közelgő események', 'mbapp-theme' ); ?></h2>
 			<?php
 			$events_page = get_option( 'mbapp_events_page_id' );
+
 			if ( $events_page ) :
 				?>
 				<a class="mb-section__link" href="<?php echo esc_url( get_permalink( $events_page ) ); ?>">
@@ -66,9 +75,7 @@ if ( shortcode_exists( 'mbapp_events' ) ) :
 	</section>
 	<?php
 endif;
-?>
 
-<?php
 // Legfrissebb hírek.
 $news_type = post_type_exists( 'mbapp_news' ) ? 'mbapp_news' : 'post';
 
@@ -82,11 +89,12 @@ $latest = new WP_Query(
 );
 
 if ( $latest->have_posts() ) :
+	$archive_link = get_post_type_archive_link( $news_type );
 	?>
 	<section class="mb-section">
 		<div class="mb-section__head">
 			<h2 class="mb-section__title"><?php esc_html_e( 'Friss hírek', 'mbapp-theme' ); ?></h2>
-			<a class="mb-section__link" href="<?php echo esc_url( get_post_type_archive_link( $news_type ) ? get_post_type_archive_link( $news_type ) : home_url( '/' ) ); ?>">
+			<a class="mb-section__link" href="<?php echo esc_url( $archive_link ? $archive_link : home_url( '/' ) ); ?>">
 				<?php esc_html_e( 'Összes', 'mbapp-theme' ); ?> &rarr;
 			</a>
 		</div>

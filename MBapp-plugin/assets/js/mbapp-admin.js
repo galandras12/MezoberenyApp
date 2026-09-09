@@ -307,9 +307,262 @@
 		});
 	}
 
+	/* ------------------------------------------------------------------
+	 * AJAX mentés – az oldal nem töltődik újra, nem ugrik a tetejére
+	 * ------------------------------------------------------------------ */
+	function badge($form) {
+		var $submit = $form.find('.submit').first();
+
+		if (!$submit.length) {
+			$submit = $form.find('[type="submit"]').last().parent();
+		}
+
+		var $badge = $submit.find('.mbapp-saved');
+
+		if (!$badge.length) {
+			$badge = $('<span class="mbapp-saved" role="status" aria-live="polite"></span>');
+			$submit.append($badge);
+		}
+
+		return $badge;
+	}
+
+	function showBadge($badge, state, text) {
+		var icon = '';
+
+		if (state === 'saved') {
+			icon = '<span class="mbapp-saved__check" aria-hidden="true">✓</span>';
+		} else if (state === 'busy') {
+			icon = '<span class="mbapp-spinner" aria-hidden="true"></span>';
+		}
+
+		$badge
+			.removeClass('mbapp-saved--error mbapp-saved--busy')
+			.addClass(state === 'error' ? 'mbapp-saved--error' : (state === 'busy' ? 'mbapp-saved--busy' : ''))
+			.html(icon + '<span>' + $('<div>').text(text).html() + '</span>')
+			.addClass('is-visible');
+	}
+
+	function initAjaxSave() {
+		$('.mbapp-form[data-mbapp-group]').on('submit', function (event) {
+			var $form = $(this);
+			var group = $form.data('mbapp-group');
+
+			if (!window.MBAppAdmin || !group) {
+				return; // marad a hagyományos beküldés
+			}
+
+			event.preventDefault();
+
+			var $badge = badge($form);
+			var $submit = $form.find('[type="submit"]');
+
+			$submit.prop('disabled', true);
+			showBadge($badge, 'busy', i18n('saving', 'Mentés…'));
+
+			// A hagyományos beküldés mezőit kivesszük, hogy ne fusson le kétszer.
+			var data = $form.serializeArray().filter(function (field) {
+				return field.name !== 'mbapp_action' && field.name !== 'mbapp_nonce';
+			});
+
+			data.push({ name: 'action', value: 'mbapp_save_settings' });
+			data.push({ name: 'nonce', value: window.MBAppAdmin.nonce });
+			data.push({ name: 'group', value: group });
+
+			$.post(window.MBAppAdmin.ajaxUrl, $.param(data))
+				.done(function (response) {
+					$submit.prop('disabled', false);
+
+					if (response && response.success) {
+						showBadge($badge, 'saved', i18n('saved', 'Elmentve'));
+
+						window.clearTimeout($badge.data('timer'));
+						$badge.data('timer', window.setTimeout(function () {
+							$badge.removeClass('is-visible');
+						}, 4000));
+					} else {
+						showBadge($badge, 'error',
+							(response && response.data && response.data.message) || i18n('saveError', 'A mentés nem sikerült.'));
+					}
+				})
+				.fail(function () {
+					$submit.prop('disabled', false);
+					showBadge($badge, 'error', i18n('saveError', 'A mentés nem sikerült.'));
+				});
+		});
+	}
+
+	/* ------------------------------------------------------------------
+	 * Animáció előnézet
+	 * ------------------------------------------------------------------ */
+	function initAnimPreview() {
+		var $button = $('#mbapp-anim-preview');
+
+		if (!$button.length) {
+			return;
+		}
+
+		var easings = {
+			'ease-out': 'cubic-bezier(.22, .61, .36, 1)',
+			'ease-in-out': 'cubic-bezier(.65, .05, .36, 1)',
+			spring: 'cubic-bezier(.34, 1.56, .64, 1)',
+			linear: 'linear'
+		};
+
+		function play() {
+			var page = document.getElementById('mbapp-anim-demo-page');
+
+			if (!page) {
+				return;
+			}
+
+			var type = $('#mbapp_anim_type').val() || 'fade';
+			var duration = parseInt($('#mbapp_anim_duration').val(), 10) || 280;
+			var easing = easings[$('#mbapp_anim_easing').val()] || easings['ease-out'];
+
+			var leave = { fade: '', slide: 'translateX(-26px)', 'slide-up': 'translateY(-20px)', scale: 'scale(.97)' };
+			var enter = { fade: '', slide: 'translateX(26px)', 'slide-up': 'translateY(20px)', scale: 'scale(1.03)' };
+
+			if (type === 'none') {
+				page.style.transition = '';
+				page.style.opacity = '1';
+				page.style.transform = '';
+				return;
+			}
+
+			page.style.transition = 'opacity ' + duration + 'ms ' + easing + ', transform ' + duration + 'ms ' + easing;
+			page.style.opacity = '0';
+			page.style.transform = leave[type] || '';
+
+			window.setTimeout(function () {
+				page.style.transition = 'none';
+				page.style.transform = enter[type] || '';
+				void page.offsetWidth;
+				page.style.transition = 'opacity ' + duration + 'ms ' + easing + ', transform ' + duration + 'ms ' + easing;
+				page.style.opacity = '1';
+				page.style.transform = '';
+			}, duration + 40);
+		}
+
+		$button.on('click', play);
+		$('.mbapp-anim-control').on('change', play);
+	}
+
+	/* ------------------------------------------------------------------
+	 * Kezdőlap blokk szerkesztő
+	 * ------------------------------------------------------------------ */
+	function reindexBlocks() {
+		$('#mbapp-home-blocks .mbapp-item').each(function (index) {
+			$(this).attr('data-index', index);
+
+			$(this).find('input, select, textarea').each(function () {
+				var name = $(this).attr('name');
+
+				if (!name) {
+					return;
+				}
+
+				$(this).attr('name', name.replace(/\[blocks\]\[[^\]]*\]/, '[blocks][' + index + ']'));
+			});
+		});
+	}
+
+	function initBlockEditor() {
+		var $wrap = $('#mbapp-home-blocks');
+
+		if (!$wrap.length) {
+			return;
+		}
+
+		$('#mbapp-add-block').on('click', function () {
+			var type = $('#mbapp-block-type').val();
+			var template = $('#tmpl-mbapp-block-' + type).html();
+
+			if (!template) {
+				return;
+			}
+
+			var index = $wrap.find('.mbapp-item').length;
+			var $row = $(template.replace(/__INDEX__/g, String(index)));
+
+			$wrap.append($row);
+			reindexBlocks();
+
+			$row.find('input[type="text"], textarea').first().trigger('focus');
+			$('html, body').animate({ scrollTop: $row.offset().top - 120 }, 300);
+		});
+
+		$wrap.on('click', '.mbapp-item__remove', function () {
+			if (!window.confirm(i18n('confirm', 'Biztosan törlöd?'))) {
+				return;
+			}
+
+			$(this).closest('.mbapp-item').remove();
+			reindexBlocks();
+		});
+
+		if ($.fn.sortable) {
+			$wrap.sortable({
+				handle: '.mbapp-item__handle',
+				axis: 'y',
+				placeholder: 'mbapp-item-placeholder',
+				update: reindexBlocks
+			});
+		}
+	}
+
+	/* ------------------------------------------------------------------
+	 * Médiaválasztó (fejléc kép)
+	 * ------------------------------------------------------------------ */
+	function initMediaPicker() {
+		var frame = null;
+
+		$(document).on('click', '.mbapp-media__pick', function () {
+			var $media = $(this).closest('.mbapp-media');
+
+			if (!window.wp || !window.wp.media) {
+				window.alert('A WordPress médiatár nem érhető el.');
+				return;
+			}
+
+			frame = window.wp.media({
+				title: 'Fejléc kép kiválasztása',
+				library: { type: 'image' },
+				button: { text: 'Kiválasztom' },
+				multiple: false
+			});
+
+			frame.on('select', function () {
+				var attachment = frame.state().get('selection').first().toJSON();
+				var url = attachment.url;
+
+				if (attachment.sizes && attachment.sizes.medium) {
+					url = attachment.sizes.medium.url;
+				}
+
+				$media.find('.mbapp-media__id').val(attachment.id);
+				$media.find('.mbapp-media__thumb').html('<img src="' + url + '" alt="">');
+				$media.find('.mbapp-media__toggle input').prop('checked', true);
+			});
+
+			frame.open();
+		});
+
+		$(document).on('click', '.mbapp-media__clear', function () {
+			var $media = $(this).closest('.mbapp-media');
+
+			$media.find('.mbapp-media__id').val('');
+			$media.find('.mbapp-media__thumb').empty();
+		});
+	}
+
 	$(function () {
 		initMenuEditor();
+		initBlockEditor();
+		initMediaPicker();
 		initPreview();
 		initDetect();
+		initAjaxSave();
+		initAnimPreview();
 	});
 })(jQuery);
