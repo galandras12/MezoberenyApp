@@ -104,9 +104,32 @@ Ami a leggyakrabban kell, egy helyen van: `app/src/main/java/hu/mezobereny/mbapp
 | `BACK_WARN_AT` / `BACK_EXIT_AT` | Hányadik visszalépésnél figyelmeztet, illetve lép ki |
 | `USER_AGENT_SUFFIX` | A User-Agent végére fűzött jelölés, hogy a webhely felismerje az appot |
 
-Szövegek: `app/src/main/res/values/strings.xml` · Színek: `app/src/main/res/values/colors.xml` ·
-Ikon: `app/src/main/res/drawable/ic_launcher*.xml` (vektoros; Android Studio *Image Asset* eszközével
-lecserélhető saját képre).
+Szövegek: `app/src/main/res/values/strings.xml` · Színek: `app/src/main/res/values/colors.xml`
+
+### Az alkalmazás ikonja
+
+Az ikon a Mezőberény App emblémája: zöld korongon a várfal kerete, benne a templom,
+a felkelő nap, a híd, a repülő madarak és a telefon, alatta a folyó hulláma.
+Teljesen **vektoros** (nincs bináris kép a projektben), így minden felbontáson éles.
+
+Minden fájl az `app/src/main/res/` alatt:
+
+| Fájl | Mire való |
+|---|---|
+| `drawable/ic_launcher_background.xml` | Adaptív ikon háttere – a márka zöldje |
+| `drawable/ic_launcher_foreground.xml` | Adaptív ikon előtere – a városkép |
+| `drawable/ic_launcher_monochrome.xml` | Android 13+ témázott (egyszínű) ikon |
+| `drawable/ic_launcher.xml` | Teljes kör alakú embléma Android 8.0 előttre |
+| `drawable-anydpi-v26/ic_launcher.xml` | Az adaptív ikont összefogó leírás |
+
+Az embléma színei az `app/src/main/res/values/colors.xml`-ben: `mb_logo_green` és
+`mb_logo_yellow`. A felület akcentus színe (folyamatjelző, hibaképernyő ikonja)
+szándékosan maradt a webhely kékje, hogy a héj és a benne megjelenő tartalom együtt
+nézzen ki – ha inkább a logó zöldjét szeretnéd, az `app/src/main/res/values/themes.xml`
+`colorPrimary` értékét írd át `@color/mb_logo_green`-re.
+
+Saját grafikára cserélni az Android Studio **Image Asset** eszközével a legegyszerűbb
+(jobb gomb az `app` modulon → *New → Image Asset*).
 
 ---
 
