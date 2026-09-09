@@ -208,3 +208,28 @@
 .mbapp-metabox__row { margin-bottom: 16px; }
 .mbapp-metabox .description { display: block; margin-top: 4px; color: #646970; }
 .mbapp-req { color: #b32d2e; }
+
+/* Forrás felderítés */
+.mbapp-ok { color: #1d7a34; font-weight: 600; }
+
+.mbapp-notes {
+	margin: 12px 0 12px 18px;
+	list-style: disc;
+}
+.mbapp-notes li { margin-bottom: 6px; }
+
+.mbapp-details { margin-top: 14px; }
+.mbapp-details summary { cursor: pointer; font-weight: 600; color: #2271b1; }
+
+.mbapp-htmlhead {
+	max-height: 260px;
+	overflow: auto;
+	padding: 12px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	font-size: 11px;
+	line-height: 1.5;
+	white-space: pre-wrap;
+	word-break: break-all;
+}

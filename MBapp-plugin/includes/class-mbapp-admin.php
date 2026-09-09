@@ -147,6 +147,10 @@ class MBapp_Admin {
 					'confirm'   => __( 'Biztosan törlöd?', 'mbapp' ),
 					'noResults' => __( 'A megadott szelektorokkal nem találtunk hírt. Próbálj más szelektort!', 'mbapp' ),
 					'found'     => __( 'Talált elem:', 'mbapp' ),
+					'detecting' => __( 'Felderítés folyamatban… ez akár fél percig is tarthat.', 'mbapp' ),
+					'apply'     => __( 'Ezt használom', 'mbapp' ),
+					'applied'   => __( 'A szelektorok kitöltve. Ellenőrizd a „Próbalekérés” gombbal, majd mentsd el!', 'mbapp' ),
+					'useFeed'   => __( 'Beállítom forrásnak', 'mbapp' ),
 				),
 			)
 		);
@@ -277,7 +281,7 @@ class MBapp_Admin {
 
 		$clean['enabled']            = ! empty( $input['enabled'] ) ? 1 : 0;
 		$clean['source_url']         = esc_url_raw( trim( (string) ( $input['source_url'] ?? '' ) ) );
-		$clean['source_type']        = in_array( $input['source_type'] ?? '', array( 'auto', 'rss', 'html' ), true )
+		$clean['source_type']        = in_array( $input['source_type'] ?? '', array( 'auto', 'rss', 'html', 'jsonld' ), true )
 			? $input['source_type']
 			: 'auto';
 
@@ -661,8 +665,9 @@ class MBapp_Admin {
 								<option value="auto" <?php selected( $s['source_type'], 'auto' ); ?>><?php esc_html_e( 'Automatikus felismerés (ajánlott)', 'mbapp' ); ?></option>
 								<option value="rss" <?php selected( $s['source_type'], 'rss' ); ?>><?php esc_html_e( 'RSS / Atom csatorna', 'mbapp' ); ?></option>
 								<option value="html" <?php selected( $s['source_type'], 'html' ); ?>><?php esc_html_e( 'HTML oldal (szelektorokkal)', 'mbapp' ); ?></option>
+								<option value="jsonld" <?php selected( $s['source_type'], 'jsonld' ); ?>><?php esc_html_e( 'JSON-LD strukturált adat', 'mbapp' ); ?></option>
 							</select>
-							<p class="description"><?php esc_html_e( 'Automatikus módban először RSS csatornát keresünk, és csak ha nincs, akkor olvassuk ki a HTML-ből.', 'mbapp' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Automatikus módban először RSS csatornát keresünk, majd a HTML szelektorokat próbáljuk, végül a JSON-LD strukturált adatot.', 'mbapp' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -686,6 +691,18 @@ class MBapp_Admin {
 						</td>
 					</tr>
 				</table>
+
+				<h2 class="title"><?php esc_html_e( 'Forrás felderítése', 'mbapp' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'Ha nem tudod, milyen szelektort kell megadni, indítsd el a felderítést: a bővítmény letölti az oldalt, megnézi van-e RSS csatornája vagy JSON-LD adata, és megkeresi az ismétlődő hírblokkokat. A javaslatra kattintva a szelektorok automatikusan kitöltődnek.', 'mbapp' ); ?>
+				</p>
+				<p>
+					<button type="button" class="button button-secondary" id="mbapp-detect">
+						<?php esc_html_e( 'Szerkezet felismerése', 'mbapp' ); ?>
+					</button>
+					<span id="mbapp-detect-status"></span>
+				</p>
+				<div id="mbapp-detect-result"></div>
 
 				<h2 class="title"><?php esc_html_e( 'HTML szelektorok', 'mbapp' ); ?></h2>
 				<p class="description">

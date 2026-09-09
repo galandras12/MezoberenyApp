@@ -52,7 +52,10 @@ A bővítmény kártyasablonjai felülírhatók a témából: hozz létre egy `m
 
 * Forrás: tetszőleges URL (alapértelmezés: `https://mezobereny.hu/s/hirek`).
 * **Automatikus felismerés**: először RSS/Atom csatornát keres (a HTML `<link rel="alternate">`
-  fejlécét is megnézi), és csak ha nincs, akkor olvassa ki a HTML-t CSS szelektorokkal.
+  fejlécét is megnézi), majd a HTML-t olvassa CSS szelektorokkal, végül a **JSON-LD** strukturált
+  adatra esik vissza – így akkor is működhet, ha a szelektorok nem találnak semmit.
+* **Szerkezetfelismerés**: a „Szerkezet felismerése” gomb megkeresi az oldalon az ismétlődő
+  hírblokkokat, és egy kattintással kitölti az összes szelektort (lásd a Hibaelhárítás fejezetet).
 * Beolvassa a **címet, szöveget, képet és dátumot**; a képet letölti a médiatárba, és kiemelt képnek állítja.
 * A cikk saját oldaláról – ha kéred – letölti a **teljes szöveget** (`og:image`,
   `article:published_time` és a megadott tartalom-szelektor alapján).
@@ -108,6 +111,58 @@ Admin felületről állítható:
   (19 beépített SVG, emoji, Dashicon vagy saját kép URL), megnyitás módja,
   kiemelt („középső”) gomb, láthatóság (minden eszközön / csak mobilon / csak nagyobb kijelzőn),
   aktív állapot. A sorrend húzással állítható.
+
+---
+
+## Hibaelhárítás: „A megadott szelektorral nem találtunk hírt”
+
+Ez az üzenet azt jelenti, hogy a bővítmény letöltötte az oldalt, de a megadott CSS szelektorral
+nem talált benne hírblokkot. Nem kell szelektorokat találgatni – a bővítmény ki tudja deríteni magától:
+
+### 1. Indítsd el a szerkezetfelismerést
+
+**MBapp → Hírbeolvasó → Forrás felderítése → „Szerkezet felismerése”**
+
+A gomb letölti az oldalt a szerverről, és megmutatja:
+
+* mekkora a letöltött HTML, és mennyi benne az **olvasható szöveg**,
+* talált-e **RSS/Atom csatornát** (a fejlécben hirdetettet és a gyakori útvonalakat is végigpróbálja:
+  `/rss`, `/feed`, `/rss.xml`, `?format=rss` stb.),
+* van-e **JSON-LD** strukturált adat a hírekről,
+* milyen **ismétlődő blokkok** vannak az oldalon (menüt, fejlécet, láblécet kihagyva), darabszámmal,
+  mintaszöveggel és kész szelektor-javaslattal.
+
+A javaslat melletti **„Ezt használom”** gombra kattintva az összes szelektor mező kitöltődik
+(hír elem, cím, link, kép, kivonat, dátum). Utána a **„Próbalekérés”** gombbal ellenőrizd,
+és mentsd el.
+
+### 2. Értelmezd az eredményt
+
+| Amit a felderítés mutat | Mit jelent | Mit tegyél |
+|---|---|---|
+| Talált RSS csatornát | A legjobb eset | „Beállítom forrásnak” → a forrás típusa *RSS / Atom* |
+| Van JSON-LD hír | Az oldal strukturált adatban is kiadja a híreket | „JSON-LD forrásra váltok” – szelektor nem is kell |
+| Van szelektor-javaslat | A hírek benne vannak a HTML-ben | „Ezt használom”, majd *Próbalekérés* |
+| Kevés olvasható szöveg (< 800 karakter), nincs javaslat | Az oldal **JavaScripttel** tölti be a híreket, a szerver csak egy üres vázat kap | RSS csatorna, JSON-LD vagy az oldal saját API címe kell forrásnak |
+| HTTP 403 / 404 hiba | Az oldal blokkolja a kérést vagy rossz a cím | Próbálj más URL-t, vagy adj meg egyedi User-Agentet a *Haladó* résznél |
+
+A felderítés alján a **„A letöltött HTML eleje”** blokk megmutatja, mit kapott valójában a szerver –
+ebből azonnal látszik, ha bot-védelem, cookie-fal vagy üres SPA-váz jött vissza.
+
+### 3. Ha kézzel keresnéd meg a szelektort
+
+Nyisd meg a hírek oldalát böngészőben, jobb gomb egy hír címén → **Elem vizsgálata**.
+Keresd meg azt a legkülső elemet, amely **pontosan egy hírt** fog körbe, és nézd meg az osztálynevét.
+Ha például ez látszik:
+
+```html
+<div class="news-list__item">…</div>
+```
+
+akkor a *Hír elem* mezőbe `div.news-list__item` (vagy elég: `.news-list__item`) kerül,
+a *Cím* mezőbe `h3 a`, a *Kép* mezőbe `img`, a *Dátum* mezőbe `time` vagy `.news-date`.
+
+Az automatikus felismerés is ezt csinálja, csak gyorsabban.
 
 ---
 
