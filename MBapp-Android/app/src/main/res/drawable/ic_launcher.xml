@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tartalék ikon Android 8.0 előtti rendszerekhez (nincs adaptív ikon). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path android:pathData="M14,0h80a14,14 0,0 1,14 14v80a14,14 0,0 1,-14 14h-80a14,14 0,0 1,-14 -14v-80a14,14 0,0 1,14 -14z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108"
+                android:type="linear">
+                <item android:offset="0" android:color="#1F6FEB" />
+                <item android:offset="1" android:color="#17B3A3" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,68V40h6.6l7.4,13.2L51.4,40H58v28h-6V51.6l-6,10.6h-4l-6,-10.6V68z" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M63,68V40h12.4q4.6,0 7.1,2.1 2.5,2.1 2.5,5.5 0,2 -1,3.5 -1,1.5 -2.8,2.2 2.2,0.6 3.4,2.3 1.2,1.7 1.2,4 0,3.6 -2.6,5.8 -2.6,2.2 -7.2,2.2zM69,51.4h6q1.9,0 2.9,-0.9 1,-0.9 1,-2.4 0,-1.5 -1,-2.3 -1,-0.8 -2.9,-0.8h-6zM69,62.8h6.6q2.1,0 3.2,-1 1.1,-1 1.1,-2.6 0,-1.6 -1.1,-2.6 -1.1,-1 -3.2,-1H69z" />
+</vector>

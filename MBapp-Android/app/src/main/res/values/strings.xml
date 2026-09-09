@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mezőberény App</string>
+
+    <!-- Hibaképernyő -->
+    <string name="offline_title">Nincs internetkapcsolat</string>
+    <string name="offline_message">Az alkalmazás használatához internetkapcsolat szükséges. Kapcsold be a mobilnetet vagy csatlakozz egy Wi-Fi hálózathoz, majd próbáld újra.</string>
+    <string name="offline_retry">Újrapróbálom</string>
+    <string name="offline_settings">Hálózati beállítások megnyitása</string>
+    <string name="still_offline">Továbbra sincs internetkapcsolat.</string>
+    <string name="connection_lost">Megszakadt az internetkapcsolat.</string>
+    <string name="load_error_message">Az oldal most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.</string>
+
+    <!-- Visszalépés -->
+    <string name="back_exit_warning">A következő visszalépéssel bezárul az alkalmazás.</string>
+
+    <!-- Egyéb -->
+    <string name="no_browser">Nincs olyan alkalmazás, amely meg tudná nyitni ezt a hivatkozást.</string>
+    <string name="no_settings">A beállítások nem nyithatók meg.</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A webhely akcentus színeivel egyező paletta. -->
+    <color name="mb_accent">#1F6FEB</color>
+    <color name="mb_accent_dark">#1857BC</color>
+    <color name="mb_accent_2">#17B3A3</color>
+
+    <color name="mb_bg_light">#EEF1F6</color>
+    <color name="mb_bg_dark">#0C1017</color>
+</resources>
