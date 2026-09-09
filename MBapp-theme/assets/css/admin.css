@@ -1,0 +1,228 @@
+/* ==========================================================================
+   MBapp téma szerkesztő – admin stílusok
+   ========================================================================== */
+
+.mbappt-tabs { margin-bottom: 0; }
+
+.mbappt-panel {
+	display: none;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-top: 0;
+	padding: 8px 22px 20px;
+}
+.mbappt-panel.is-active { display: block; }
+
+.mbappt-panel h2 {
+	margin: 16px 0 4px;
+	font-size: 15px;
+	color: #1d2327;
+}
+
+/* Kapcsolók */
+.mbappt-toggle {
+	display: block;
+	margin-bottom: 8px;
+	line-height: 1.6;
+}
+
+/* Rádiós választók előnézettel */
+.mbappt-choices {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.mbappt-choice {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+	min-width: 116px;
+	padding: 12px;
+	background: #fff;
+	border: 2px solid #dcdcde;
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: center;
+	transition: border-color .2s ease, box-shadow .2s ease;
+}
+.mbappt-choice:hover { border-color: #a7aaad; }
+.mbappt-choice:has(input:checked) {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+.mbappt-choice em { font-size: 11px; color: #646970; font-style: normal; }
+
+.mbappt-choice__bar {
+	width: 84px;
+	background: linear-gradient(135deg, #2271b1, #17b3a3);
+	border-radius: 6px;
+}
+.mbappt-choice__bar--compact { height: 14px; }
+.mbappt-choice__bar--normal { height: 20px; }
+.mbappt-choice__bar--large { height: 28px; }
+
+.mbappt-choice__shape {
+	width: 42px;
+	height: 42px;
+	background: linear-gradient(135deg, #2271b1, #17b3a3);
+}
+.mbappt-choice__shape--circle { border-radius: 50%; }
+.mbappt-choice__shape--rounded { border-radius: 12px; }
+.mbappt-choice__shape--square { border-radius: 2px; }
+
+/* Médiaválasztó */
+.mbappt-media {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	flex-wrap: wrap;
+	margin-top: 10px;
+	padding: 12px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	max-width: 620px;
+}
+
+.mbappt-media__thumb {
+	display: grid;
+	place-items: center;
+	width: 160px;
+	height: 96px;
+	background: #fff;
+	border: 1px dashed #c3c4c7;
+	border-radius: 6px;
+	overflow: hidden;
+	flex: 0 0 auto;
+}
+.mbappt-media__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.mbappt-media__buttons { display: flex; align-items: center; gap: 10px; }
+.mbappt-media__clear { color: #b32d2e; }
+
+/* Egyedi szövegek – ismétlődő sorok */
+.mbappt-items {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 12px 0 16px;
+	max-width: 1000px;
+}
+
+.mbappt-item {
+	display: grid;
+	grid-template-columns: 26px 1fr 28px;
+	align-items: start;
+	gap: 12px;
+	padding: 14px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-left: 4px solid #2271b1;
+	border-radius: 8px;
+}
+
+.mbappt-item-placeholder {
+	height: 120px;
+	border: 2px dashed #c3c4c7;
+	border-radius: 8px;
+	background: #f6f7f7;
+}
+
+.mbappt-item__handle {
+	cursor: grab;
+	color: #a7aaad;
+	font-size: 18px;
+	padding-top: 8px;
+	user-select: none;
+}
+.mbappt-item__handle:active { cursor: grabbing; }
+
+.mbappt-item__fields {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.mbappt-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #50575e;
+}
+.mbappt-field input,
+.mbappt-field select,
+.mbappt-field textarea { width: 100%; }
+.mbappt-field--sm { max-width: 240px; }
+.mbappt-field--full { grid-column: 1 / -1; }
+
+.mbappt-item__checks {
+	grid-column: 1 / -1;
+	display: flex;
+	gap: 18px;
+	font-size: 12px;
+	color: #50575e;
+}
+
+.mbappt-item__remove {
+	color: #b32d2e;
+	font-size: 16px;
+	cursor: pointer;
+	padding-top: 6px;
+}
+
+/* Mentés visszajelzése */
+.mbappt-saved {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: 10px;
+	padding: 4px 12px;
+	border-radius: 999px;
+	font-weight: 600;
+	font-size: 13px;
+	background: #edfaef;
+	color: #1d7a34;
+	border: 1px solid #b6e3c0;
+	opacity: 0;
+	transform: translateX(-6px);
+	transition: opacity .25s ease, transform .25s ease;
+	vertical-align: middle;
+}
+.mbappt-saved.is-visible { opacity: 1; transform: none; }
+.mbappt-saved--error { background: #fcf0f1; color: #b32d2e; border-color: #f0b6b7; }
+.mbappt-saved--busy { background: #f0f6fc; color: #2271b1; border-color: #b9d4ee; }
+
+.mbappt-saved__check {
+	display: inline-grid;
+	place-items: center;
+	width: 17px;
+	height: 17px;
+	border-radius: 50%;
+	background: #1d7a34;
+	color: #fff;
+	font-size: 11px;
+	animation: mbappt-pop .32s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes mbappt-pop {
+	from { transform: scale(0); }
+	to { transform: scale(1); }
+}
+
+.mbappt-spinner {
+	width: 14px;
+	height: 14px;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 50%;
+	animation: mbappt-spin .7s linear infinite;
+}
+@keyframes mbappt-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 782px) {
+	.mbappt-item { grid-template-columns: 24px 1fr 28px; }
+	.mbappt-panel { padding: 8px 14px 16px; }
+}

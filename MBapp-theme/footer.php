@@ -7,6 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
+			<?php mbapp_theme_after_content(); ?>
 		</div><!-- .mb-container -->
 	</main><!-- .mb-main -->
 

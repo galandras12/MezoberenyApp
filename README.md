@@ -20,11 +20,12 @@ Két önálló, de együttműködő WordPress csomag egy alkalmazás-jellegű v�
 3. **Bővítmények** → *MBapp Plugin* aktiválása.
    Aktiváláskor létrejön az „Események” oldal a `[mbapp_events]` shortcode-dal, elindul a hírbeolvasó
    ütemezése és elkészül a napló adatbázistáblája.
-4. **MBapp → Kezdőlap**: állítsd össze, mi jelenjen meg a főoldalon (fejléc kép, hírek,
+4. **Megjelenés → MBapp téma**: fejléc mérete, fejléc kép, favicon, diavetítés, egyedi szövegek.
+5. **MBapp → Kezdőlap**: állítsd össze, mi jelenjen meg a főoldalon (fejléc kép, hírek,
    események, saját HTML tartalom).
-5. **MBapp → Hírbeolvasó**: állítsd be a forrást, majd a *Próbalekérés* gombbal ellenőrizd,
+6. **MBapp → Hírbeolvasó**: állítsd be a forrást, majd a *Próbalekérés* gombbal ellenőrizd,
    hogy a beolvasó megtalálja-e a híreket.
-6. **MBapp → Lebegő menü**: állítsd be a gombokat, ikonokat, az URL-eket és az animációkat.
+7. **MBapp → Lebegő menü**: állítsd be a gombokat, ikonokat, az URL-eket és az animációkat.
 
 Igény szerint a **Beállítások → Olvasás** menüben a kezdőlapot állítsd statikus oldalra – a téma
 kezdőlapja ilyenkor is kiteszi alá a közelgő eseményeket és a friss híreket.
@@ -32,6 +33,23 @@ kezdőlapja ilyenkor is kiteszi alá a közelgő eseményeket és a friss hírek
 ---
 
 ## MBapp Theme
+
+### Részletes szerkesztő: Megjelenés → MBapp téma
+
+A téma saját, fülekre osztott szerkesztő felületet kapott. AJAX-szal ment (nincs újratöltés,
+a gomb mögött pipa jelenik meg), és ugyanabba a tárolóba ír, mint a Testreszabó — a kettő
+mindig szinkronban marad.
+
+| Fül | Mit állíthatsz |
+|---|---|
+| **Fejléc** | A fejléc **mérete** (alacsony 50 / közepes 58 / magas 70 px, előnézettel), logó/ikon mérete, tartalomszélesség, tapadó fejléc, üveg hatás, mottó / kereső / vissza gomb / lábléc ki-be. |
+| **Fejléc kép** | Ki-be kapcsolható **banner**: kép a médiatárból, magasság (160–460 px), a kép igazítása (felső/közép/alsó rész), sötétítés 0–90%, lekerekített sarkok, és hogy hol jelenjen meg (kezdőlap / minden oldal / belső oldalak). Ráírható **cím és alcím** is. |
+| **Favicon** | Egyedi ikon a médiatárból: böngészőfül ikon, `apple-touch-icon` a telefon kezdőképernyőjéhez, és felülírja a WordPress webhely ikonját. **Megjelenése**: kitehető a fejlécbe a webhely neve mellé, alakja kör / lekerekített / szögletes. |
+| **Diavetítés** | **Ki-be kapcsolható diavetítés a bejegyzésekből**: forrás (Hírek / bejegyzések / kiemelt sticky), diák száma, kategória szűrő, magasság, hol jelenjen meg, automatikus léptetés és időköz, nyilak, pöttyök, csak képes bejegyzések, bevezető szöveg. |
+| **Egyedi szövegek** | Tetszőleges számú **saját szövegblokk**: cím, emoji ikon, szöveg, hely (tartalom előtt / után), stílus (egyszerű / kártya / információ / figyelmeztetés / kiemelt), és mely oldalakon jelenjen meg. A sorrend húzással állítható. |
+
+A diavetítés érintéssel is lapozható, megáll, ha az egeret fölé viszed vagy elhagyod a lapot,
+és a `prefers-reduced-motion` beállítás mellett nem indul el magától.
 
 * **Telefonos app felület minden oldalon**: a tartalom egy középre igazított hasáb, nagy kijelzőn is –
   nincs widget oldalsáv sehol, a bejegyzés oldalon sem. A hasáb szélessége a testreszabóban állítható
@@ -44,8 +62,8 @@ kezdőlapja ilyenkor is kiteszi alá a közelgő eseményeket és a friss hírek
   A választás `localStorage`-ban marad meg, alapból a rendszerbeállítást követi, és villogásmentesen tölt be.
 * **Lebegő menü (dock)**: a bővítmény tölti fel tartalommal; ha az nincs bekapcsolva, a `dock`
   menühelyre kötött WordPress menüből épül tartalék változat.
-* **Testreszabó** (Megjelenés → Testreszabás → *MBapp felület*): akcentus színek, alapértelmezett téma,
-  tartalomszélesség, mottó / kereső / vissza gomb megjelenítése, lábléc ki-be kapcsolása és lábléc szöveg.
+* **Testreszabó** (Megjelenés → Testreszabás → *MBapp felület*): akcentus színek és alapértelmezett téma
+  élő előnézettel. A részletesebb beállítások a fenti szerkesztő felületen érhetők el.
 * Sablonok: `index`, `front-page`, `single`, `page`, `archive`, `search`, `404`, plus `template-parts/`.
 * Menühelyek: `primary`, `dock`, `footer`. Widget terület: `footer-1` (oldalsáv szándékosan nincs).
 

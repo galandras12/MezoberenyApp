@@ -69,3 +69,4 @@ defined( 'ABSPATH' ) || exit;
 
 	<main class="mb-main" id="mb-content" role="main" data-mbapp-view>
 		<div class="mb-container">
+			<?php mbapp_theme_before_content(); ?>
