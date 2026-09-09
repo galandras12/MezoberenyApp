@@ -67,12 +67,21 @@ class MBapp_Settings {
 				'date_format'      => 'Y. F j. H:i',
 			),
 			'menu'   => array(
-				'enabled'     => 1,
-				'position'    => 'bottom',
-				'show_labels' => 1,
-				'autohide'    => 1,
-				'style'       => 'glass',
-				'hide_on'     => 'none',
+				'enabled'       => 1,
+				'position'      => 'bottom',
+				'show_labels'   => 1,
+				'autohide'      => 1,
+				'style'         => 'glass',
+				'hide_on'       => 'none',
+				// AJAX navigáció és animációk.
+				'ajax_nav'      => 1,
+				'ajax_scope'    => 'menu',
+				'anim_type'     => 'slide',
+				'anim_duration' => 280,
+				'anim_easing'   => 'ease-out',
+				'progress_bar'  => 1,
+				'tap_effect'    => 'ripple',
+				'dock_anim'     => 'slide-up',
 				'items'       => array(
 					array(
 						'label'     => __( 'Kezdőlap', 'mbapp' ),
@@ -177,6 +186,61 @@ class MBapp_Settings {
 		}
 
 		return update_option( self::OPTIONS[ $group ], $values );
+	}
+
+	/**
+	 * Elérhető oldalátmenet animációk.
+	 *
+	 * @return array
+	 */
+	public static function animations() {
+		return array(
+			'none'     => __( 'Nincs animáció', 'mbapp' ),
+			'fade'     => __( 'Áttűnés', 'mbapp' ),
+			'slide'    => __( 'Oldalirányú csúsztatás (app érzet)', 'mbapp' ),
+			'slide-up' => __( 'Felfelé csúsztatás', 'mbapp' ),
+			'scale'    => __( 'Nagyítás', 'mbapp' ),
+		);
+	}
+
+	/**
+	 * Elérhető időzítési görbék.
+	 *
+	 * @return array
+	 */
+	public static function easings() {
+		return array(
+			'ease-out'    => __( 'Lágy lassítás (ease-out)', 'mbapp' ),
+			'ease-in-out' => __( 'Lágy indítás és lassítás', 'mbapp' ),
+			'spring'      => __( 'Rugós (kicsit túllendül)', 'mbapp' ),
+			'linear'      => __( 'Egyenletes', 'mbapp' ),
+		);
+	}
+
+	/**
+	 * A gombnyomás visszajelzései.
+	 *
+	 * @return array
+	 */
+	public static function tap_effects() {
+		return array(
+			'ripple' => __( 'Hullám (ripple)', 'mbapp' ),
+			'scale'  => __( 'Benyomódás', 'mbapp' ),
+			'none'   => __( 'Nincs', 'mbapp' ),
+		);
+	}
+
+	/**
+	 * A lebegő menü megjelenési animációja.
+	 *
+	 * @return array
+	 */
+	public static function dock_animations() {
+		return array(
+			'slide-up' => __( 'Alulról felcsúszik', 'mbapp' ),
+			'fade'     => __( 'Áttűnik', 'mbapp' ),
+			'none'     => __( 'Azonnal megjelenik', 'mbapp' ),
+		);
 	}
 
 	/**

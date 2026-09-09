@@ -67,7 +67,13 @@ class MBapp_Floating_Menu {
 		wp_enqueue_style( 'mbapp' );
 		wp_enqueue_script( 'mbapp' );
 
-		$classes = array( 'mb-dock', 'mbapp-dock', 'mbapp-dock--' . $settings['style'] );
+		$classes = array(
+			'mb-dock',
+			'mbapp-dock',
+			'mbapp-dock--' . $settings['style'],
+			'mbapp-dock--anim-' . $settings['dock_anim'],
+			'mbapp-dock--tap-' . $settings['tap_effect'],
+		);
 
 		if ( 'bottom' !== $settings['position'] ) {
 			$classes[] = 'mb-dock--' . $settings['position'];
@@ -103,7 +109,7 @@ class MBapp_Floating_Menu {
 				}
 
 				printf(
-					'<a class="%1$s" href="%2$s"%3$s%4$s><span class="mb-dock__icon mbapp-dock__icon">%5$s</span><span class="mb-dock__label">%6$s</span></a>',
+					'<a class="%1$s" href="%2$s"%3$s%4$s data-mbapp-link><span class="mb-dock__icon mbapp-dock__icon">%5$s</span><span class="mb-dock__label">%6$s</span></a>',
 					esc_attr( implode( ' ', $item_classes ) ),
 					esc_url( $url ),
 					'_blank' === $item['target'] ? ' target="_blank" rel="noopener noreferrer"' : '',

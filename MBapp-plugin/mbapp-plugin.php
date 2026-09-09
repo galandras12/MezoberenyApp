@@ -139,12 +139,24 @@ final class MBapp_Plugin {
 			true
 		);
 
+		$menu = MBapp_Settings::all( 'menu' );
+
 		wp_localize_script(
 			'mbapp',
 			'MBApp',
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'mbapp_public' ),
+				'home'    => home_url( '/' ),
+				'nav'     => array(
+					'enabled'     => ! empty( $menu['ajax_nav'] ) && ! empty( $menu['enabled'] ),
+					'scope'       => $menu['ajax_scope'],
+					'animation'   => $menu['anim_type'],
+					'duration'    => (int) $menu['anim_duration'],
+					'easing'      => self::easing_value( $menu['anim_easing'] ),
+					'progressBar' => ! empty( $menu['progress_bar'] ),
+					'container'   => '[data-mbapp-view], #mb-content, main',
+				),
 				'i18n'    => array(
 					'loading' => __( 'Betöltés…', 'mbapp' ),
 					'more'    => __( 'További', 'mbapp' ),
@@ -159,6 +171,23 @@ final class MBapp_Plugin {
 		// stíluslapjai már kiíródtak.
 		wp_enqueue_style( 'mbapp' );
 		wp_enqueue_script( 'mbapp' );
+	}
+
+	/**
+	 * Az időzítési görbe CSS értéke.
+	 *
+	 * @param string $key Kulcs.
+	 * @return string
+	 */
+	public static function easing_value( $key ) {
+		$map = array(
+			'ease-out'    => 'cubic-bezier(.22, .61, .36, 1)',
+			'ease-in-out' => 'cubic-bezier(.65, .05, .36, 1)',
+			'spring'      => 'cubic-bezier(.34, 1.56, .64, 1)',
+			'linear'      => 'linear',
+		);
+
+		return isset( $map[ $key ] ) ? $map[ $key ] : $map['ease-out'];
 	}
 
 	/**

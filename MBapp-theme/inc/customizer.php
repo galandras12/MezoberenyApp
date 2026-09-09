@@ -116,6 +116,45 @@ function mbapp_theme_customize_register( $wp_customize ) {
 	);
 
 	$wp_customize->add_setting(
+		'mbapp_app_width',
+		array(
+			'default'           => 'compact',
+			'sanitize_callback' => 'mbapp_theme_sanitize_width',
+		)
+	);
+	$wp_customize->add_control(
+		'mbapp_app_width',
+		array(
+			'label'       => __( 'Tartalom szélessége', 'mbapp-theme' ),
+			'description' => __( 'Az app felület nagyobb kijelzőn is egy középre igazított hasáb marad, mint egy telefonos alkalmazás.', 'mbapp-theme' ),
+			'section'     => 'mbapp_header',
+			'type'        => 'select',
+			'choices'     => array(
+				'phone'   => __( 'Telefon (560 px) – leginkább app hatás', 'mbapp-theme' ),
+				'compact' => __( 'Kompakt (720 px) – ajánlott', 'mbapp-theme' ),
+				'wide'    => __( 'Széles (1080 px)', 'mbapp-theme' ),
+			),
+		)
+	);
+
+	$wp_customize->add_setting(
+		'mbapp_show_back',
+		array(
+			'default'           => true,
+			'sanitize_callback' => 'mbapp_theme_sanitize_checkbox',
+		)
+	);
+	$wp_customize->add_control(
+		'mbapp_show_back',
+		array(
+			'label'       => __( 'Vissza gomb a fejlécben', 'mbapp-theme' ),
+			'description' => __( 'A kezdőlapon kívül minden oldalon megjelenik, mint egy mobilalkalmazásban.', 'mbapp-theme' ),
+			'section'     => 'mbapp_header',
+			'type'        => 'checkbox',
+		)
+	);
+
+	$wp_customize->add_setting(
 		'mbapp_show_tagline',
 		array(
 			'default'           => true,
@@ -212,6 +251,16 @@ add_action( 'customize_register', 'mbapp_theme_customize_register' );
  */
 function mbapp_theme_sanitize_checkbox( $value ) {
 	return (bool) $value;
+}
+
+/**
+ * Tartalomszélesség fertőtlenítése.
+ *
+ * @param string $value Érték.
+ * @return string
+ */
+function mbapp_theme_sanitize_width( $value ) {
+	return in_array( $value, array( 'phone', 'compact', 'wide' ), true ) ? $value : 'compact';
 }
 
 /**

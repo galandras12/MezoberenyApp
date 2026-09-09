@@ -307,9 +307,152 @@
 		});
 	}
 
+	/* ------------------------------------------------------------------
+	 * AJAX mentés – az oldal nem töltődik újra, nem ugrik a tetejére
+	 * ------------------------------------------------------------------ */
+	function badge($form) {
+		var $submit = $form.find('.submit').first();
+
+		if (!$submit.length) {
+			$submit = $form.find('[type="submit"]').last().parent();
+		}
+
+		var $badge = $submit.find('.mbapp-saved');
+
+		if (!$badge.length) {
+			$badge = $('<span class="mbapp-saved" role="status" aria-live="polite"></span>');
+			$submit.append($badge);
+		}
+
+		return $badge;
+	}
+
+	function showBadge($badge, state, text) {
+		var icon = '';
+
+		if (state === 'saved') {
+			icon = '<span class="mbapp-saved__check" aria-hidden="true">✓</span>';
+		} else if (state === 'busy') {
+			icon = '<span class="mbapp-spinner" aria-hidden="true"></span>';
+		}
+
+		$badge
+			.removeClass('mbapp-saved--error mbapp-saved--busy')
+			.addClass(state === 'error' ? 'mbapp-saved--error' : (state === 'busy' ? 'mbapp-saved--busy' : ''))
+			.html(icon + '<span>' + $('<div>').text(text).html() + '</span>')
+			.addClass('is-visible');
+	}
+
+	function initAjaxSave() {
+		$('.mbapp-form[data-mbapp-group]').on('submit', function (event) {
+			var $form = $(this);
+			var group = $form.data('mbapp-group');
+
+			if (!window.MBAppAdmin || !group) {
+				return; // marad a hagyományos beküldés
+			}
+
+			event.preventDefault();
+
+			var $badge = badge($form);
+			var $submit = $form.find('[type="submit"]');
+
+			$submit.prop('disabled', true);
+			showBadge($badge, 'busy', i18n('saving', 'Mentés…'));
+
+			// A hagyományos beküldés mezőit kivesszük, hogy ne fusson le kétszer.
+			var data = $form.serializeArray().filter(function (field) {
+				return field.name !== 'mbapp_action' && field.name !== 'mbapp_nonce';
+			});
+
+			data.push({ name: 'action', value: 'mbapp_save_settings' });
+			data.push({ name: 'nonce', value: window.MBAppAdmin.nonce });
+			data.push({ name: 'group', value: group });
+
+			$.post(window.MBAppAdmin.ajaxUrl, $.param(data))
+				.done(function (response) {
+					$submit.prop('disabled', false);
+
+					if (response && response.success) {
+						showBadge($badge, 'saved', i18n('saved', 'Elmentve'));
+
+						window.clearTimeout($badge.data('timer'));
+						$badge.data('timer', window.setTimeout(function () {
+							$badge.removeClass('is-visible');
+						}, 4000));
+					} else {
+						showBadge($badge, 'error',
+							(response && response.data && response.data.message) || i18n('saveError', 'A mentés nem sikerült.'));
+					}
+				})
+				.fail(function () {
+					$submit.prop('disabled', false);
+					showBadge($badge, 'error', i18n('saveError', 'A mentés nem sikerült.'));
+				});
+		});
+	}
+
+	/* ------------------------------------------------------------------
+	 * Animáció előnézet
+	 * ------------------------------------------------------------------ */
+	function initAnimPreview() {
+		var $button = $('#mbapp-anim-preview');
+
+		if (!$button.length) {
+			return;
+		}
+
+		var easings = {
+			'ease-out': 'cubic-bezier(.22, .61, .36, 1)',
+			'ease-in-out': 'cubic-bezier(.65, .05, .36, 1)',
+			spring: 'cubic-bezier(.34, 1.56, .64, 1)',
+			linear: 'linear'
+		};
+
+		function play() {
+			var page = document.getElementById('mbapp-anim-demo-page');
+
+			if (!page) {
+				return;
+			}
+
+			var type = $('#mbapp_anim_type').val() || 'fade';
+			var duration = parseInt($('#mbapp_anim_duration').val(), 10) || 280;
+			var easing = easings[$('#mbapp_anim_easing').val()] || easings['ease-out'];
+
+			var leave = { fade: '', slide: 'translateX(-26px)', 'slide-up': 'translateY(-20px)', scale: 'scale(.97)' };
+			var enter = { fade: '', slide: 'translateX(26px)', 'slide-up': 'translateY(20px)', scale: 'scale(1.03)' };
+
+			if (type === 'none') {
+				page.style.transition = '';
+				page.style.opacity = '1';
+				page.style.transform = '';
+				return;
+			}
+
+			page.style.transition = 'opacity ' + duration + 'ms ' + easing + ', transform ' + duration + 'ms ' + easing;
+			page.style.opacity = '0';
+			page.style.transform = leave[type] || '';
+
+			window.setTimeout(function () {
+				page.style.transition = 'none';
+				page.style.transform = enter[type] || '';
+				void page.offsetWidth;
+				page.style.transition = 'opacity ' + duration + 'ms ' + easing + ', transform ' + duration + 'ms ' + easing;
+				page.style.opacity = '1';
+				page.style.transform = '';
+			}, duration + 40);
+		}
+
+		$button.on('click', play);
+		$('.mbapp-anim-control').on('change', play);
+	}
+
 	$(function () {
 		initMenuEditor();
 		initPreview();
 		initDetect();
+		initAjaxSave();
+		initAnimPreview();
 	});
 })(jQuery);

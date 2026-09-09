@@ -233,3 +233,95 @@
 	white-space: pre-wrap;
 	word-break: break-all;
 }
+
+/* --------------------------------------------------------------------------
+   AJAX mentés visszajelzése
+   -------------------------------------------------------------------------- */
+.mbapp-saved {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: 10px;
+	padding: 4px 12px;
+	border-radius: 999px;
+	font-weight: 600;
+	font-size: 13px;
+	background: #edfaef;
+	color: #1d7a34;
+	border: 1px solid #b6e3c0;
+	opacity: 0;
+	transform: translateX(-6px);
+	transition: opacity .25s ease, transform .25s ease;
+	vertical-align: middle;
+}
+.mbapp-saved.is-visible { opacity: 1; transform: none; }
+.mbapp-saved--error { background: #fcf0f1; color: #b32d2e; border-color: #f0b6b7; }
+.mbapp-saved--busy { background: #f0f6fc; color: #2271b1; border-color: #b9d4ee; }
+
+.mbapp-saved__check {
+	display: inline-grid;
+	place-items: center;
+	width: 17px;
+	height: 17px;
+	border-radius: 50%;
+	background: #1d7a34;
+	color: #fff;
+	font-size: 11px;
+	line-height: 1;
+	animation: mbapp-check-pop .32s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes mbapp-check-pop {
+	0% { transform: scale(0); }
+	100% { transform: scale(1); }
+}
+
+.mbapp-spinner {
+	width: 14px;
+	height: 14px;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 50%;
+	animation: mbapp-spin .7s linear infinite;
+}
+@keyframes mbapp-spin { to { transform: rotate(360deg); } }
+
+/* --------------------------------------------------------------------------
+   Animáció előnézet
+   -------------------------------------------------------------------------- */
+.mbapp-anim-demo {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.mbapp-anim-demo__screen {
+	width: 132px;
+	height: 200px;
+	padding: 10px;
+	overflow: hidden;
+	background: #f6f7f7;
+	border: 2px solid #c3c4c7;
+	border-radius: 18px;
+}
+
+.mbapp-anim-demo__page {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	height: 100%;
+}
+
+.mbapp-anim-demo__bar {
+	height: 10px;
+	border-radius: 4px;
+	background: #c3c4c7;
+}
+.mbapp-anim-demo__bar--short { width: 60%; }
+
+.mbapp-anim-demo__block {
+	flex: 1;
+	border-radius: 8px;
+	background: linear-gradient(135deg, #2271b1, #17b3a3);
+	opacity: .75;
+}

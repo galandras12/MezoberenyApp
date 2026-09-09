@@ -370,3 +370,134 @@
 	border-radius: 26px;
 	box-shadow: 0 18px 40px rgba(16, 24, 40, .18);
 }
+
+/* ==========================================================================
+   AJAX oldalváltás – animációk
+   ========================================================================== */
+
+/* Kilépő állapotok (az aktuális tartalom elhagyja a képernyőt) */
+.mbapp-view--leave-fade { opacity: 0; }
+.mbapp-view--leave-slide { opacity: 0; transform: translateX(-26px); }
+.mbapp-view--leave-slide-up { opacity: 0; transform: translateY(-20px); }
+.mbapp-view--leave-scale { opacity: 0; transform: scale(.97); }
+
+/* Belépő kezdőállapotok (innen animálunk vissza az alaphelyzetbe) */
+.mbapp-view--enter-fade { opacity: 0; }
+.mbapp-view--enter-slide { opacity: 0; transform: translateX(26px); }
+.mbapp-view--enter-slide-up { opacity: 0; transform: translateY(20px); }
+.mbapp-view--enter-scale { opacity: 0; transform: scale(1.03); }
+
+/* Az animáció alatt ne lehessen véletlenül kattintani */
+.mbapp-ajax-nav [data-mbapp-view] { will-change: opacity, transform; }
+
+/* Folyamatjelző csík */
+.mbapp-progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	z-index: 9999;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity .2s ease;
+}
+.mbapp-progress.is-active,
+.mbapp-progress.is-done { opacity: 1; }
+
+.mbapp-progress__fill {
+	display: block;
+	height: 100%;
+	width: 0;
+	background: linear-gradient(90deg, var(--mb-accent, #1f6feb), var(--mb-accent-2, #17b3a3));
+	border-radius: 0 3px 3px 0;
+	box-shadow: 0 0 10px color-mix(in srgb, var(--mb-accent, #1f6feb) 60%, transparent);
+	transition: width .3s ease;
+}
+.mbapp-progress.is-active .mbapp-progress__fill {
+	width: 75%;
+	transition: width 1.6s cubic-bezier(.1, .7, .2, 1);
+}
+.mbapp-progress.is-done .mbapp-progress__fill {
+	width: 100%;
+	transition: width .18s ease;
+}
+
+/* ==========================================================================
+   Lebegő menü – megjelenés és gombnyomás animációk
+   ========================================================================== */
+
+.mbapp-dock--anim-slide-up {
+	animation: mbapp-dock-up .42s cubic-bezier(.22, .61, .36, 1) both;
+}
+@keyframes mbapp-dock-up {
+	from { opacity: 0; transform: translateX(-50%) translateY(120%); }
+	to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Oldalsó elhelyezésnél nincs vízszintes középre igazítás */
+.mb-dock--left.mbapp-dock--anim-slide-up,
+.mb-dock--right.mbapp-dock--anim-slide-up {
+	animation-name: mbapp-dock-up-side;
+}
+@keyframes mbapp-dock-up-side {
+	from { opacity: 0; transform: translateY(30px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.mbapp-dock--anim-fade { animation: mbapp-dock-fade .35s ease both; }
+@keyframes mbapp-dock-fade {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+/* Gombnyomás visszajelzése */
+.mbapp-dock--tap-scale .mb-dock__item:active { transform: scale(.9); }
+
+.mbapp-dock--tap-ripple .mb-dock__item {
+	position: relative;
+	overflow: hidden;
+	-webkit-tap-highlight-color: transparent;
+}
+.mbapp-dock--tap-ripple .mb-dock__item::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+	opacity: 0;
+	transform: scale(1);
+	pointer-events: none;
+}
+.mbapp-dock--tap-ripple .mb-dock__item:active::after {
+	animation: mbapp-ripple .5s ease-out;
+}
+@keyframes mbapp-ripple {
+	0% { opacity: .28; transform: scale(1); }
+	100% { opacity: 0; transform: scale(14); }
+}
+
+.mbapp-dock--tap-none .mb-dock__item:active { transform: none; }
+
+/* Az aktív menüpont ikonja finoman megemelkedik */
+.mb-dock__item.is-active .mb-dock__icon {
+	animation: mbapp-icon-pop .32s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes mbapp-icon-pop {
+	0% { transform: scale(1); }
+	55% { transform: scale(1.22) translateY(-2px); }
+	100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mbapp-dock--anim-slide-up,
+	.mbapp-dock--anim-fade,
+	.mb-dock__item.is-active .mb-dock__icon,
+	.mbapp-dock--tap-ripple .mb-dock__item:active::after {
+		animation: none !important;
+	}
+	.mbapp-progress { display: none; }
+}

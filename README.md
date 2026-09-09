@@ -31,7 +31,10 @@ kezdőlapja ilyenkor is kiteszi alá a közelgő eseményeket és a friss hírek
 
 ## MBapp Theme
 
-* **Reszponzív, app-szerű felület**: mobil (1 oszlop), tablet (2 oszlop), asztali gép (3 oszlop + oldalsáv).
+* **Telefonos app felület minden oldalon**: a tartalom egy középre igazított hasáb, nagy kijelzőn is –
+  nincs widget oldalsáv sehol, a bejegyzés oldalon sem. A hasáb szélessége a testreszabóban állítható
+  (Telefon 560 px / Kompakt 720 px / Széles 1080 px).
+* **Vissza gomb** a fejlécben minden oldalon a kezdőlapon kívül, mint egy mobilalkalmazásban.
 * **Sötét / világos téma kapcsoló** az app bar-ban és a láblécben.
   A választás `localStorage`-ban marad meg, alapból a rendszerbeállítást követi, és villogásmentesen tölt be.
 * **Lebegő menü (dock)**: a bővítmény tölti fel tartalommal; ha az nincs bekapcsolva, a `dock`
@@ -39,7 +42,7 @@ kezdőlapja ilyenkor is kiteszi alá a közelgő eseményeket és a friss hírek
 * **Testreszabó** (Megjelenés → Testreszabás → *MBapp felület*): akcentus színek, alapértelmezett téma,
   mottó és kereső megjelenítése, lábléc szöveg.
 * Sablonok: `index`, `front-page`, `single`, `page`, `archive`, `search`, `404`, plus `template-parts/`.
-* Menühelyek: `primary`, `dock`, `footer`. Widget területek: `sidebar-1`, `footer-1`.
+* Menühelyek: `primary`, `dock`, `footer`. Widget terület: `footer-1` (oldalsáv szándékosan nincs).
 
 A bővítmény kártyasablonjai felülírhatók a témából: hozz létre egy `mbapp/` mappát a témán belül,
 és tedd bele az `event-card.php` vagy `news-card.php` másolatát.
@@ -100,13 +103,23 @@ automatikusan törlődnek.
 [mbapp_source url="https://mezobereny.hu/"]     – forrás gomb kézzel
 ```
 
-### 4. Lebegő menü (MBapp → Lebegő menü)
+### 4. Lebegő menü és AJAX navigáció (MBapp → Lebegő menü)
 
 Admin felületről állítható:
 
 * **Pozíció**: alul (mobil app stílus), felül, bal vagy jobb oldalon.
 * **Stílus**: áttetsző (üveg hatás) vagy tömör.
 * **Feliratok** ki/be, **görgetéskor elrejtés** ki/be.
+* **AJAX oldalváltás**: az oldalak újratöltés nélkül, animálva váltanak – ettől viselkedik a felület
+  igazi mobilalkalmazásként. Hatóköre lehet csak a lebegő menü, vagy minden oldalon belüli hivatkozás.
+* **Animációk**: átmenet típusa (áttűnés, oldalirányú csúsztatás, felfelé csúsztatás, nagyítás, nincs),
+  hossza (80–900 ms), időzítési görbe (lágy lassítás, lágy indítás-lassítás, rugós, egyenletes).
+  Az admin oldalon egy kis telefon-előnézetben **azonnal le is játszható** a beállított animáció.
+* **Betöltésjelző** csík a képernyő tetején, **gombnyomás visszajelzése** (hullám / benyomódás / nincs),
+  és a menü **megjelenési animációja** (felcsúszik / áttűnik / azonnal).
+
+Ha a böngésző nem támogatja az AJAX navigációt, vagy bármi hiba történik, a felület magától
+visszaáll a hagyományos oldalbetöltésre. A `prefers-reduced-motion` beállítást minden animáció tiszteletben tartja.
 * **Menüpontonként**: felirat, URL (teljes cím vagy `/belso/utvonal/`), ikon
   (19 beépített SVG, emoji, Dashicon vagy saját kép URL), megnyitás módja,
   kiemelt („középső”) gomb, láthatóság (minden eszközön / csak mobilon / csak nagyobb kijelzőn),
@@ -163,6 +176,14 @@ akkor a *Hír elem* mezőbe `div.news-list__item` (vagy elég: `.news-list__item
 a *Cím* mezőbe `h3 a`, a *Kép* mezőbe `img`, a *Dátum* mezőbe `time` vagy `.news-date`.
 
 Az automatikus felismerés is ezt csinálja, csak gyorsabban.
+
+---
+
+## Az admin panel mentése
+
+A beállítások **AJAX-szal mentődnek**: az oldal nem töltődik újra, nem ugrik a tetejére, és a
+mentés gomb mögött megjelenik egy zöld **pipa** („Elmentve”), amely néhány másodperc után elhalványul.
+Ha JavaScript nélkül használod az admint, a hagyományos űrlapbeküldés változatlanul működik.
 
 ---
 
