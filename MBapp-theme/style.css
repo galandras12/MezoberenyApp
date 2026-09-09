@@ -1,0 +1,18 @@
+/*
+Theme Name: MBapp Theme
+Theme URI: https://mezobereny.hu/
+Author: Mezőberény App
+Author URI: https://mezobereny.hu/
+Description: Webapp jellegű, mobilra / tabletre / asztali gépre optimalizált WordPress téma sötét-világos témaváltóval, alkalmazás-szerű lebegő menüvel. Az MBapp Plugin bővítménnyel együtt működik (hírek, események, lebegő menü).
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.6
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: mbapp-theme
+Tags: app, mobile-first, dark-mode, responsive, custom-menu, translation-ready
+
+Ez a fájl csak a téma fejlécét tartalmazza. A tényleges stílusok:
+assets/css/app.css
+*/
