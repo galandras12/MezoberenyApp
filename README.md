@@ -20,9 +20,11 @@ Két önálló, de együttműködő WordPress csomag egy alkalmazás-jellegű v�
 3. **Bővítmények** → *MBapp Plugin* aktiválása.
    Aktiváláskor létrejön az „Események” oldal a `[mbapp_events]` shortcode-dal, elindul a hírbeolvasó
    ütemezése és elkészül a napló adatbázistáblája.
-4. **MBapp → Hírbeolvasó**: állítsd be a forrást, majd a *Próbalekérés* gombbal ellenőrizd,
+4. **MBapp → Kezdőlap**: állítsd össze, mi jelenjen meg a főoldalon (fejléc kép, hírek,
+   események, saját HTML tartalom).
+5. **MBapp → Hírbeolvasó**: állítsd be a forrást, majd a *Próbalekérés* gombbal ellenőrizd,
    hogy a beolvasó megtalálja-e a híreket.
-5. **MBapp → Lebegő menü**: állítsd be a gombokat, ikonokat és az URL-eket.
+6. **MBapp → Lebegő menü**: állítsd be a gombokat, ikonokat, az URL-eket és az animációkat.
 
 Igény szerint a **Beállítások → Olvasás** menüben a kezdőlapot állítsd statikus oldalra – a téma
 kezdőlapja ilyenkor is kiteszi alá a közelgő eseményeket és a friss híreket.
@@ -103,7 +105,30 @@ automatikusan törlődnek.
 [mbapp_source url="https://mezobereny.hu/"]     – forrás gomb kézzel
 ```
 
-### 4. Lebegő menü és AJAX navigáció (MBapp → Lebegő menü)
+### 4. Testreszabható kezdőlap (MBapp → Kezdőlap)
+
+A kezdőlap **blokkokból** épül fel. Mindegyik ki-be kapcsolható, húzással átrendezhető,
+és bármennyi újat hozzáadhatsz:
+
+| Blokk | Mit tud |
+|---|---|
+| **Fejléc (hero)** | Cím, alcím, gomb (felirat + URL). A **háttérkép külön kapcsolható ki-be**: a médiatárból választható, állítható a magasság (alacsony / közepes / magas), a kép sötétítése (0–90%) és az igazítás (balra / középre). Kép nélkül színátmenetes fejléc jelenik meg. |
+| **Események** | Közelgő programok: darabszám, rács vagy felsorolás, véget ért események, „További” gomb, „Összes” link. |
+| **Hírek** | A legfrissebb cikkek: darabszám, rács vagy felsorolás, „Összes” link az archívumra. |
+| **Egyedi tartalom** | **Saját HTML**, tetszőleges helyre beszúrva. Kapcsolható, hogy fussanak-e benne a shortcode-ok, és hogy kártyás keretben jelenjen-e meg. |
+| **Oldal tartalma** | Egy meglévő WordPress oldal szövegének beemelése. |
+
+Ugyanaz a blokk többször is szerepelhet – lehet például két hírblokk különböző beállításokkal,
+vagy egy HTML blokk a hírek és az események között.
+
+A HTML blokk tartalmára ugyanaz a szabály vonatkozik, mint a bejegyzésekre: akinek van
+`unfiltered_html` jogosultsága (általában az adminisztrátor), nyers HTML-t is menthet,
+mindenki másnál a `wp_kses_post` szűri a tartalmat.
+
+Ha az egyedi kezdőlapot kikapcsolod, a téma alapértelmezett kezdőlapja jelenik meg
+(a statikus kezdőlap tartalma, alatta az eseményekkel és a hírekkel).
+
+### 5. Lebegő menü és AJAX navigáció (MBapp → Lebegő menü)
 
 Admin felületről állítható:
 

@@ -42,6 +42,7 @@ require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-source-detector.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-news-importer.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-events.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-shortcodes.php';
+require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-front-page.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-floating-menu.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-ajax.php';
 require_once MBAPP_PLUGIN_DIR . 'includes/class-mbapp-cron.php';

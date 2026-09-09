@@ -21,6 +21,7 @@ $options = array(
 	'mbapp_news_settings',
 	'mbapp_events_settings',
 	'mbapp_menu_settings',
+	'mbapp_home_settings',
 	'mbapp_news_last_run',
 	'mbapp_events_page_id',
 	'mbapp_db_version',

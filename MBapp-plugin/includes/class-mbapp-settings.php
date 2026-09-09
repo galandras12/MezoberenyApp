@@ -19,6 +19,7 @@ class MBapp_Settings {
 		'news'   => 'mbapp_news_settings',
 		'events' => 'mbapp_events_settings',
 		'menu'   => 'mbapp_menu_settings',
+		'home'   => 'mbapp_home_settings',
 	);
 
 	/**
@@ -130,6 +131,42 @@ class MBapp_Settings {
 					),
 				),
 			),
+			'home'   => array(
+				'enabled' => 1,
+				'blocks'  => array(
+					array(
+						'type'         => 'hero',
+						'enabled'      => 1,
+						'title'        => '',
+						'subtitle'     => '',
+						'show_image'   => 0,
+						'image'        => '',
+						'height'       => 'normal',
+						'overlay'      => 45,
+						'align'        => 'left',
+						'button_label' => '',
+						'button_url'   => '',
+					),
+					array(
+						'type'     => 'events',
+						'enabled'  => 1,
+						'title'    => __( 'Közelgő események', 'mbapp' ),
+						'limit'    => 3,
+						'layout'   => 'grid',
+						'past'     => 'no',
+						'loadmore' => 'no',
+						'link'     => 1,
+					),
+					array(
+						'type'    => 'news',
+						'enabled' => 1,
+						'title'   => __( 'Friss hírek', 'mbapp' ),
+						'limit'   => 6,
+						'layout'  => 'grid',
+						'link'    => 1,
+					),
+				),
+			),
 		);
 
 		return isset( $defaults[ $group ] ) ? $defaults[ $group ] : array();
@@ -186,6 +223,21 @@ class MBapp_Settings {
 		}
 
 		return update_option( self::OPTIONS[ $group ], $values );
+	}
+
+	/**
+	 * A kezdőlapon elhelyezhető blokktípusok.
+	 *
+	 * @return array
+	 */
+	public static function block_types() {
+		return array(
+			'hero'   => __( 'Fejléc (hero) – cím, alcím, háttérkép, gomb', 'mbapp' ),
+			'events' => __( 'Események – a közelgő programok', 'mbapp' ),
+			'news'   => __( 'Hírek – a legfrissebb cikkek', 'mbapp' ),
+			'html'   => __( 'Egyedi tartalom – saját HTML vagy shortcode', 'mbapp' ),
+			'page'   => __( 'Oldal tartalma – egy meglévő oldal szövege', 'mbapp' ),
+		);
 	}
 
 	/**

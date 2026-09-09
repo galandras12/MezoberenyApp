@@ -325,3 +325,66 @@
 	background: linear-gradient(135deg, #2271b1, #17b3a3);
 	opacity: .75;
 }
+
+/* --------------------------------------------------------------------------
+   Kezdőlap blokk szerkesztő
+   -------------------------------------------------------------------------- */
+.mbapp-block__label {
+	grid-column: 1 / -1;
+	margin: 0 0 2px;
+	font-size: 13px;
+	color: #1d2327;
+}
+
+.mbapp-block--hero { border-left-color: #17b3a3; }
+.mbapp-block--events { border-left-color: #d98d00; }
+.mbapp-block--news { border-left-color: #2271b1; }
+.mbapp-block--html,
+.mbapp-block--page { border-left-color: #7a4fd6; }
+
+.mbapp-field--full { grid-column: 1 / -1; }
+.mbapp-field--full textarea {
+	width: 100%;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+}
+
+.mbapp-addblock {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+/* Médiaválasztó */
+.mbapp-media {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 10px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+}
+.mbapp-media__toggle { font-weight: 600; font-size: 12px; }
+
+.mbapp-media__row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.mbapp-media__thumb {
+	display: grid;
+	place-items: center;
+	width: 96px;
+	height: 62px;
+	background: #fff;
+	border: 1px dashed #c3c4c7;
+	border-radius: 6px;
+	overflow: hidden;
+}
+.mbapp-media__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.mbapp-media__clear { color: #b32d2e; }
