@@ -77,7 +77,6 @@ A repóban szándékosan nincs benne a `gradle-wrapper.jar` (bináris), ezért a
 egyszer létre kell hozni:
 
 ```bash
-cd MBapp-Android
 gradle wrapper          # ha van rendszerszintű Gradle 8.x
 ./gradlew assembleDebug # innentől a wrapper használható
 ```
@@ -105,8 +104,8 @@ Ami a leggyakrabban kell, egy helyen van: `app/src/main/java/hu/mezobereny/mbapp
 | `BACK_WARN_AT` / `BACK_EXIT_AT` | Hányadik visszalépésnél figyelmeztet, illetve lép ki |
 | `USER_AGENT_SUFFIX` | A User-Agent végére fűzött jelölés, hogy a webhely felismerje az appot |
 
-Szövegek: `app/src/main/res/values/strings.xml` · Színek: `values/colors.xml` ·
-Ikon: `drawable/ic_launcher*.xml` (vektoros; Android Studio *Image Asset* eszközével
+Szövegek: `app/src/main/res/values/strings.xml` · Színek: `app/src/main/res/values/colors.xml` ·
+Ikon: `app/src/main/res/drawable/ic_launcher*.xml` (vektoros; Android Studio *Image Asset* eszközével
 lecserélhető saját képre).
 
 ---
