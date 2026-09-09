@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 		</div><!-- .mb-container -->
 	</main><!-- .mb-main -->
 
+	<?php if ( mbapp_theme_get_option( 'show_footer', false ) ) : ?>
 	<footer class="mb-footer" role="contentinfo">
 		<div class="mb-container">
 			<div class="mb-footer__grid">
@@ -57,6 +58,7 @@ defined( 'ABSPATH' ) || exit;
 			</div>
 		</div>
 	</footer>
+	<?php endif; ?>
 
 	<?php mbapp_theme_dock(); ?>
 

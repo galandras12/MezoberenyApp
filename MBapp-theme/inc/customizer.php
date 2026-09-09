@@ -226,6 +226,23 @@ function mbapp_theme_customize_register( $wp_customize ) {
 	);
 
 	$wp_customize->add_setting(
+		'mbapp_show_footer',
+		array(
+			'default'           => false,
+			'sanitize_callback' => 'mbapp_theme_sanitize_checkbox',
+		)
+	);
+	$wp_customize->add_control(
+		'mbapp_show_footer',
+		array(
+			'label'       => __( 'Lábléc megjelenítése', 'mbapp-theme' ),
+			'description' => __( 'Alapból kikapcsolva: a mobilalkalmazásoknak nincs láblécük. Bekapcsolva megjelenik a lábléc menü, a widgetek, a szerzői jogi sor és a téma váltó gomb.', 'mbapp-theme' ),
+			'section'     => 'mbapp_footer',
+			'type'        => 'checkbox',
+		)
+	);
+
+	$wp_customize->add_setting(
 		'mbapp_footer_text',
 		array(
 			'default'           => '',
@@ -235,9 +252,10 @@ function mbapp_theme_customize_register( $wp_customize ) {
 	$wp_customize->add_control(
 		'mbapp_footer_text',
 		array(
-			'label'   => __( 'Lábléc szöveg', 'mbapp-theme' ),
-			'section' => 'mbapp_footer',
-			'type'    => 'textarea',
+			'label'       => __( 'Lábléc szöveg', 'mbapp-theme' ),
+			'description' => __( 'Csak akkor látszik, ha a lábléc be van kapcsolva.', 'mbapp-theme' ),
+			'section'     => 'mbapp_footer',
+			'type'        => 'textarea',
 		)
 	);
 }

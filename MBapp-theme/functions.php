@@ -154,6 +154,10 @@ function mbapp_theme_body_classes( $classes ) {
 	$classes[] = 'mb-app-shell';
 	$classes[] = 'mb-width-' . mbapp_theme_get_option( 'app_width', 'compact' );
 
+	if ( ! mbapp_theme_get_option( 'show_footer', false ) ) {
+		$classes[] = 'mb-no-footer';
+	}
+
 	if ( mbapp_theme_has_plugin() ) {
 		$classes[] = 'mb-has-plugin';
 	}

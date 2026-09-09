@@ -872,6 +872,12 @@ textarea { width: 100%; }
 	color: var(--mb-text-3);
 }
 
+/* Lábléc nélküli (app) nézet: a tartalom alá kicsit több levegő kerül,
+   hogy az utolsó kártya ne érjen hozzá a lebegő menühöz. */
+.mb-no-footer .mb-main {
+	padding-bottom: calc(var(--mb-dock-h) + env(safe-area-inset-bottom, 0px) + var(--mb-space-7));
+}
+
 /* --------------------------------------------------------------------------
    11. App váz: vissza gomb, bejegyzés navigáció, widgetek a láblécben
    -------------------------------------------------------------------------- */

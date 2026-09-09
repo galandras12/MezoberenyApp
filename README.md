@@ -37,12 +37,15 @@ kezdőlapja ilyenkor is kiteszi alá a közelgő eseményeket és a friss hírek
   nincs widget oldalsáv sehol, a bejegyzés oldalon sem. A hasáb szélessége a testreszabóban állítható
   (Telefon 560 px / Kompakt 720 px / Széles 1080 px).
 * **Vissza gomb** a fejlécben minden oldalon a kezdőlapon kívül, mint egy mobilalkalmazásban.
+* **Lábléc kapcsoló**: alapból nincs lábléc – a mobilalkalmazásoknak sincs. Egy kattintással
+  visszakapcsolható (Testreszabás → MBapp felület → Lábléc), ilyenkor megjelenik a lábléc menü,
+  a widgetek, a szerzői jogi sor és a téma váltó gomb is.
 * **Sötét / világos téma kapcsoló** az app bar-ban és a láblécben.
   A választás `localStorage`-ban marad meg, alapból a rendszerbeállítást követi, és villogásmentesen tölt be.
 * **Lebegő menü (dock)**: a bővítmény tölti fel tartalommal; ha az nincs bekapcsolva, a `dock`
   menühelyre kötött WordPress menüből épül tartalék változat.
 * **Testreszabó** (Megjelenés → Testreszabás → *MBapp felület*): akcentus színek, alapértelmezett téma,
-  mottó és kereső megjelenítése, lábléc szöveg.
+  tartalomszélesség, mottó / kereső / vissza gomb megjelenítése, lábléc ki-be kapcsolása és lábléc szöveg.
 * Sablonok: `index`, `front-page`, `single`, `page`, `archive`, `search`, `404`, plus `template-parts/`.
 * Menühelyek: `primary`, `dock`, `footer`. Widget terület: `footer-1` (oldalsáv szándékosan nincs).
 
