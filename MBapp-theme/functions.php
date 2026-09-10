@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MBAPP_THEME_VERSION', '1.1.0' );
+define( 'MBAPP_THEME_VERSION', '1.1.1' );
 define( 'MBAPP_THEME_DIR', get_template_directory() );
 define( 'MBAPP_THEME_URI', get_template_directory_uri() );
 

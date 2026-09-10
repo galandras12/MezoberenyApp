@@ -12,7 +12,7 @@ Két önálló, de együttműködő WordPress csomag egy alkalmazás-jellegű v�
 > mobilalkalmazás-mintát követ (felső app bar, kártyás tartalom, alul lebegő menü). A színek,
 > az ikonok, a menüpontok és az elrendezés admin felületről szabadon átállíthatók.
 
-A téma és a bővítmény **v1.1.0**, az Android alkalmazás **1.1.0 (versionCode 1)**.
+A téma és a bővítmény **v1.1.1**, az Android alkalmazás **1.1.0 (versionCode 1)**.
 
 ---
 
