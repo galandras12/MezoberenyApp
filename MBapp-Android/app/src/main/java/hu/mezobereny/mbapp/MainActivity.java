@@ -110,6 +110,12 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.connection_lost, Toast.LENGTH_LONG).show();
             }
         });
+
+        // Ha a kapcsolat még a háttérben töltött idő alatt tért vissza, a figyelő
+        // nem feltétlenül kap eseményt – ezért itt egyszer közvetlenül is megnézzük.
+        if (showingOffline && networkMonitor.isOnline()) {
+            retry();
+        }
     }
 
     @Override

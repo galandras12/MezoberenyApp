@@ -6,7 +6,7 @@ Minden más hivatkozás a telefon alapértelmezett böngészőjében nyílik meg
 
 * Csomagnév: `hu.mezobereny.mbapp`
 * Verzió: 1.1.0 (versionCode 1)
-* Minimum Android: 6.0 (API 23) · Cél: Android 14 (API 34)
+* Minimum Android: 6.0 (API 23) · Cél és fordítás: Android 16 (API 36)
 * Nyelv: Java, AndroidX (Material 3)
 
 ---
@@ -70,6 +70,21 @@ Az időkorlát és a küszöbök a `Config` osztályban állíthatók
 2. Az Android Studio letölti a Gradle-t és a függőségeket, és létrehozza a
    `local.properties` fájlt az SDK elérési útjával.
 3. **Run** gombbal telepítheted eszközre vagy emulátorra.
+
+### Amire a fordításhoz szükség van
+
+| Elem | Verzió | Megjegyzés |
+|---|---|---|
+| Android Gradle Plugin | 8.13.2 | `build.gradle` |
+| Gradle | 8.14.5 | `gradle/wrapper/gradle-wrapper.properties` |
+| Android SDK Platform | 36 | Az Android Studio felajánlja a letöltését |
+| JDK | 21 | A `gradle/gradle-daemon-jvm.properties` a JetBrains kiadását kéri |
+
+A `gradle/gradle-daemon-jvm.properties` fájlt az Android Studio hozta létre. Ez a
+Gradle démonhoz **JetBrains JDK 21**-et ír elő, és ha nincs a gépen, a Gradle letölti a
+`api.foojay.io` szolgáltatásról. Saját gépen ez kényelmes, de egy zárt hálózaton lévő
+build-kiszolgálón hálózati függőséget jelent – ilyenkor a fájl törölhető, és a Gradle a
+helyben telepített JDK-t használja.
 
 ### Parancssorból
 

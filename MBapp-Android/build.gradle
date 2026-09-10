@@ -4,5 +4,6 @@ plugins {
 }
 
 tasks.register('clean', Delete) {
-    delete rootProject.buildDir
+    // A rootProject.buildDir a Gradle 9-ben megszűnik, ez a modern megfelelője.
+    delete rootProject.layout.buildDirectory
 }
