@@ -28,6 +28,31 @@ class MBapp_Front_Page {
 	}
 
 	/**
+	 * Van-e bekapcsolt, teljes szélességű blokk a kezdőlapon.
+	 *
+	 * @return bool
+	 */
+	public static function has_full_width_block() {
+		$settings = MBapp_Settings::all( 'home' );
+
+		if ( empty( $settings['blocks'] ) || ! is_array( $settings['blocks'] ) ) {
+			return false;
+		}
+
+		foreach ( $settings['blocks'] as $block ) {
+			if ( empty( $block['enabled'] ) ) {
+				continue;
+			}
+
+			if ( isset( $block['width'] ) && 'full' === $block['width'] ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * A kezdőlap kirajzolása.
 	 */
 	public static function render() {
@@ -117,39 +142,68 @@ class MBapp_Front_Page {
 	 * @return string
 	 */
 	private static function render_hero( array $block ) {
-		$title    = ! empty( $block['title'] ) ? $block['title'] : get_bloginfo( 'name' );
-		$subtitle = isset( $block['subtitle'] ) ? $block['subtitle'] : '';
+		$block = self::hero_defaults( $block );
+
+		$title    = '' !== trim( (string) $block['title'] ) ? $block['title'] : get_bloginfo( 'name' );
+		$subtitle = (string) $block['subtitle'];
+		$images   = self::hero_images( $block );
 
 		$classes = array(
 			'mbapp-hero',
-			'mbapp-hero--' . ( isset( $block['height'] ) ? $block['height'] : 'normal' ),
-			'mbapp-hero--' . ( isset( $block['align'] ) ? $block['align'] : 'left' ),
+			'mbapp-hero--' . $block['height'],
+			'mbapp-hero--' . $block['align'],
+			'mbapp-hero--shape-' . $block['shape'],
+			'mbapp-hero--' . $block['width'],
 		);
 
-		$style = '';
-
-		// A háttérkép külön kapcsolható ki-be.
-		$image = '';
-
-		if ( ! empty( $block['show_image'] ) && ! empty( $block['image'] ) ) {
-			$image = is_numeric( $block['image'] )
-				? (string) wp_get_attachment_image_url( (int) $block['image'], 'full' )
-				: (string) $block['image'];
+		if ( $images ) {
+			$classes[] = 'mbapp-hero--image';
 		}
 
-		if ( $image ) {
-			$classes[] = 'mbapp-hero--image';
-			$overlay   = isset( $block['overlay'] ) ? max( 0, min( 90, (int) $block['overlay'] ) ) / 100 : 0.45;
+		if ( count( $images ) > 1 ) {
+			$classes[] = 'mbapp-hero--slideshow';
+		}
 
-			$style = sprintf(
-				' style="background-image:linear-gradient(rgba(6,10,16,%1$s),rgba(6,10,16,%1$s)),url(%2$s)"',
-				esc_attr( (string) $overlay ),
-				esc_url( $image )
+		$attrs = '';
+
+		if ( count( $images ) > 1 ) {
+			$attrs = sprintf(
+				' data-mbapp-hero data-interval="%1$d" data-autoplay="%2$s"',
+				max( 2, min( 30, (int) $block['interval'] ) ) * 1000,
+				! empty( $block['autoplay'] ) ? '1' : '0'
 			);
 		}
 
-		$out = sprintf( '<section class="%1$s"%2$s>', esc_attr( implode( ' ', $classes ) ), $style );
+		$out = sprintf(
+			'<section class="%1$s"%2$s>',
+			esc_attr( implode( ' ', $classes ) ),
+			$attrs
+		);
 
+		/* --- Médiaréteg: egy kép vagy diavetítés --- */
+		if ( $images ) {
+			$out .= '<div class="mbapp-hero__media" data-mbapp-hero-slides>';
+
+			foreach ( $images as $index => $url ) {
+				$out .= sprintf(
+					'<div class="mbapp-hero__slide%1$s" style="background-image:url(%2$s)"></div>',
+					0 === $index ? ' is-active' : '',
+					esc_url( $url )
+				);
+			}
+
+			$out .= '</div>';
+
+			// A sötétítés külön réteg, így a diák válthatnak alatta.
+			$overlay = max( 0, min( 90, (int) $block['overlay'] ) ) / 100;
+
+			$out .= sprintf(
+				'<div class="mbapp-hero__overlay" style="--mbapp-hero-overlay:%s"></div>',
+				esc_attr( (string) $overlay )
+			);
+		}
+
+		/* --- Szöveg --- */
 		$out .= '<div class="mbapp-hero__inner">';
 		$out .= '<h1 class="mbapp-hero__title">' . esc_html( $title ) . '</h1>';
 
@@ -157,7 +211,7 @@ class MBapp_Front_Page {
 			$out .= '<p class="mbapp-hero__subtitle">' . esc_html( $subtitle ) . '</p>';
 		}
 
-		if ( ! empty( $block['button_label'] ) && ! empty( $block['button_url'] ) ) {
+		if ( '' !== trim( (string) $block['button_label'] ) && '' !== trim( (string) $block['button_url'] ) ) {
 			$out .= sprintf(
 				'<p class="mbapp-hero__actions"><a class="mbapp-btn mbapp-hero__btn" href="%1$s">%2$s</a></p>',
 				esc_url( self::resolve_url( $block['button_url'] ) ),
@@ -165,9 +219,140 @@ class MBapp_Front_Page {
 			);
 		}
 
-		$out .= '</div></section>';
+		$out .= '</div>';
+
+		/* --- Diavetítés vezérlők --- */
+		if ( count( $images ) > 1 ) {
+			if ( ! empty( $block['arrows'] ) ) {
+				$out .= '<button type="button" class="mbapp-hero__nav mbapp-hero__nav--prev" data-mbapp-hero-prev aria-label="'
+					. esc_attr__( 'Előző kép', 'mbapp' ) . '">&#8249;</button>';
+				$out .= '<button type="button" class="mbapp-hero__nav mbapp-hero__nav--next" data-mbapp-hero-next aria-label="'
+					. esc_attr__( 'Következő kép', 'mbapp' ) . '">&#8250;</button>';
+			}
+
+			if ( ! empty( $block['dots'] ) ) {
+				$out .= '<div class="mbapp-hero__dots" data-mbapp-hero-dots>';
+
+				foreach ( array_keys( $images ) as $index ) {
+					$out .= sprintf(
+						'<button type="button" class="mbapp-hero__dot%1$s" data-index="%2$d" aria-label="%3$s"></button>',
+						0 === $index ? ' is-active' : '',
+						$index,
+						esc_attr(
+							sprintf(
+								/* translators: %d: a kép sorszáma */
+								__( '%d. kép megjelenítése', 'mbapp' ),
+								$index + 1
+							)
+						)
+					);
+				}
+
+				$out .= '</div>';
+			}
+		}
+
+		$out .= '</section>';
 
 		return $out;
+	}
+
+	/**
+	 * A fejléc blokk mezőinek kiegészítése alapértékekkel.
+	 *
+	 * A korábbi mentésekben még a `show_image` jelző döntött a háttérképről,
+	 * ezért abból vezetjük le a médiamódot, ha az még nincs elmentve.
+	 *
+	 * @param array $block Blokk.
+	 * @return array
+	 */
+	public static function hero_defaults( array $block ) {
+		$block = wp_parse_args(
+			$block,
+			array(
+				'title'        => '',
+				'subtitle'     => '',
+				'media'        => '',
+				'show_image'   => 0,
+				'image'        => 0,
+				'images'       => '',
+				'interval'     => 6,
+				'autoplay'     => 1,
+				'dots'         => 1,
+				'arrows'       => 0,
+				'width'        => 'container',
+				'shape'        => 'rounded',
+				'height'       => 'normal',
+				'overlay'      => 45,
+				'align'        => 'left',
+				'button_label' => '',
+				'button_url'   => '',
+			)
+		);
+
+		if ( '' === $block['media'] ) {
+			$block['media'] = ( ! empty( $block['show_image'] ) && ! empty( $block['image'] ) ) ? 'image' : 'none';
+		}
+
+		return $block;
+	}
+
+	/**
+	 * A fejléc blokkhoz tartozó képek URL-jei.
+	 *
+	 * @param array $block Blokk (már kiegészítve).
+	 * @return array
+	 */
+	public static function hero_images( array $block ) {
+		$urls = array();
+
+		if ( 'image' === $block['media'] ) {
+			$url = self::attachment_url( $block['image'] );
+
+			if ( $url ) {
+				$urls[] = $url;
+			}
+		} elseif ( 'slideshow' === $block['media'] ) {
+			// A diavetítés kizárólag médiatári azonosítókkal dolgozik, így a
+			// hibás bejegyzések nem kerülnek ki a kimenetbe.
+			foreach ( explode( ',', (string) $block['images'] ) as $id ) {
+				$id = absint( trim( $id ) );
+
+				if ( ! $id ) {
+					continue;
+				}
+
+				$url = self::attachment_url( $id );
+
+				if ( $url ) {
+					$urls[] = $url;
+				}
+			}
+		}
+
+		return array_values( $urls );
+	}
+
+	/**
+	 * Csatolmány URL-je az azonosítóból (vagy közvetlenül megadott cím).
+	 *
+	 * @param mixed $image Azonosító vagy URL.
+	 * @return string
+	 */
+	private static function attachment_url( $image ) {
+		if ( is_numeric( $image ) ) {
+			$id = (int) $image;
+
+			if ( ! $id ) {
+				return '';
+			}
+
+			$url = wp_get_attachment_image_url( $id, 'full' );
+
+			return $url ? $url : '';
+		}
+
+		return esc_url_raw( (string) $image );
 	}
 
 	/**
@@ -315,6 +500,28 @@ class MBapp_Front_Page {
 		return home_url( '/' . ltrim( $url, '/' ) );
 	}
 }
+
+/**
+ * Body osztály, ha teljes szélességű fejléc van a kezdőlapon.
+ *
+ * Erre azért van szükség, mert a széltől szélig érő blokk kilóg a tartalom
+ * hasábjából, és a vízszintes görgetősávot le kell vágni.
+ *
+ * @param array $classes Osztályok.
+ * @return array
+ */
+function mbapp_front_page_body_class( $classes ) {
+	if ( ! is_front_page() || ! MBapp_Front_Page::is_enabled() ) {
+		return $classes;
+	}
+
+	if ( MBapp_Front_Page::has_full_width_block() ) {
+		$classes[] = 'mbapp-has-fullwidth';
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', 'mbapp_front_page_body_class' );
 
 /**
  * A téma ezt hívja meg a kezdőlap kirajzolásához.

@@ -91,14 +91,14 @@
 	var nav = (window.MBApp && window.MBApp.nav) || {};
 	var navigating = false;
 
+	function reducedMotion() {
+		return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	}
+
 	function supportsAjaxNav() {
 		return !!(nav.enabled &&
 			window.history && window.history.pushState &&
 			window.fetch && window.DOMParser);
-	}
-
-	function reducedMotion() {
-		return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 	}
 
 	function viewContainer(doc) {
@@ -271,6 +271,7 @@
 				}));
 
 				document.querySelectorAll('.mbapp-events').forEach(initLoadMore);
+				initHeroes();
 			})
 			.catch(function () {
 				// Bármi gond van, marad a hagyományos oldalbetöltés.
@@ -345,8 +346,97 @@
 		window.history.replaceState({ mbapp: true }, '', window.location.href);
 	}
 
+	/* ==================================================================
+	 * Fejléc diavetítés (hero)
+	 * ================================================================== */
+	function initHero(hero) {
+		var slides = Array.prototype.slice.call(hero.querySelectorAll('.mbapp-hero__slide'));
+
+		if (slides.length < 2) {
+			return;
+		}
+
+		var dots = Array.prototype.slice.call(hero.querySelectorAll('.mbapp-hero__dot'));
+		var index = 0;
+		var timer = null;
+
+		function show(next) {
+			index = (next + slides.length) % slides.length;
+
+			slides.forEach(function (slide, i) {
+				slide.classList.toggle('is-active', i === index);
+			});
+
+			dots.forEach(function (dot, i) {
+				dot.classList.toggle('is-active', i === index);
+			});
+		}
+
+		function start() {
+			stop();
+
+			if (hero.dataset.autoplay !== '1' || reducedMotion()) {
+				return;
+			}
+
+			timer = window.setInterval(function () {
+				show(index + 1);
+			}, parseInt(hero.dataset.interval, 10) || 6000);
+		}
+
+        function stop() {
+			if (timer) {
+				window.clearInterval(timer);
+				timer = null;
+			}
+		}
+
+		var prev = hero.querySelector('[data-mbapp-hero-prev]');
+		var next = hero.querySelector('[data-mbapp-hero-next]');
+
+		if (prev) {
+			prev.addEventListener('click', function () {
+				show(index - 1);
+				start();
+			});
+		}
+
+		if (next) {
+			next.addEventListener('click', function () {
+				show(index + 1);
+				start();
+			});
+		}
+
+		dots.forEach(function (dot) {
+			dot.addEventListener('click', function () {
+				show(parseInt(dot.dataset.index, 10) || 0);
+				start();
+			});
+		});
+
+		hero.addEventListener('mouseenter', stop);
+		hero.addEventListener('mouseleave', start);
+		hero.addEventListener('focusin', stop);
+
+		document.addEventListener('visibilitychange', function () {
+			if (document.hidden) {
+				stop();
+			} else if (document.body.contains(hero)) {
+				start();
+			}
+		});
+
+		start();
+	}
+
+	function initHeroes() {
+		document.querySelectorAll('[data-mbapp-hero]').forEach(initHero);
+	}
+
 	function init() {
 		document.querySelectorAll('.mbapp-events').forEach(initLoadMore);
+		initHeroes();
 		initAjaxNav();
 	}
 

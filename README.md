@@ -136,7 +136,7 @@ A kezdőlap **blokkokból** épül fel. Mindegyik ki-be kapcsolható, húzással
 
 | Blokk | Mit tud |
 |---|---|
-| **Fejléc (hero)** | Cím, alcím, gomb (felirat + URL). A **háttérkép külön kapcsolható ki-be**: a médiatárból választható, állítható a magasság (alacsony / közepes / magas), a kép sötétítése (0–90%) és az igazítás (balra / középre). Kép nélkül színátmenetes fejléc jelenik meg. |
+| **Fejléc (hero)** | Cím, alcím, gomb (felirat + URL). **Háttér**: nincs kép (színátmenet), egy feltöltött kép, vagy **diavetítés több képpel** (sorrend húzással, váltási idő, automatikus léptetés, pöttyök, nyilak). **Szélesség**: a tartalom hasábjában vagy **teljes szélességben, széltől szélig**. **Sarkok**: erősen / enyhén lekerekített vagy szögletes. Emellett magasság (alacsonytól a majdnem teljes képernyőig), a kép sötétítése 0–90%, igazítás. A blokk egy kattintással **ki is kapcsolható**. |
 | **Események** | Közelgő programok: darabszám, rács vagy felsorolás, véget ért események, „További” gomb, „Összes” link. |
 | **Hírek** | A legfrissebb cikkek: darabszám, rács vagy felsorolás, „Összes” link az archívumra. |
 | **Egyedi tartalom** | **Saját HTML**, tetszőleges helyre beszúrva. Kapcsolható, hogy fussanak-e benne a shortcode-ok, és hogy kártyás keretben jelenjen-e meg. |

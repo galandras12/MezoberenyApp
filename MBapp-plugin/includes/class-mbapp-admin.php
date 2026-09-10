@@ -541,16 +541,44 @@ class MBapp_Admin {
 
 			switch ( $type ) {
 				case 'hero':
-					$clean_block['subtitle']     = sanitize_text_field( (string) ( $block['subtitle'] ?? '' ) );
-					$clean_block['show_image']   = ! empty( $block['show_image'] ) ? 1 : 0;
-					$clean_block['image']        = absint( $block['image'] ?? 0 );
-					$clean_block['height']       = in_array( $block['height'] ?? '', array( 'compact', 'normal', 'tall' ), true )
+					$clean_block['subtitle'] = sanitize_text_field( (string) ( $block['subtitle'] ?? '' ) );
+
+					$clean_block['media'] = array_key_exists( $block['media'] ?? '', MBapp_Settings::hero_media_modes() )
+						? $block['media']
+						: 'none';
+
+					$clean_block['image'] = absint( $block['image'] ?? 0 );
+
+					// A diavetítés képei vesszővel elválasztott azonosítókként érkeznek.
+					$ids = array_filter( array_map( 'absint', explode( ',', (string) ( $block['images'] ?? '' ) ) ) );
+
+					$clean_block['images']   = implode( ',', $ids );
+					$clean_block['interval'] = min( 30, max( 2, absint( $block['interval'] ?? 6 ) ) );
+					$clean_block['autoplay'] = ! empty( $block['autoplay'] ) ? 1 : 0;
+					$clean_block['dots']     = ! empty( $block['dots'] ) ? 1 : 0;
+					$clean_block['arrows']   = ! empty( $block['arrows'] ) ? 1 : 0;
+
+					$clean_block['width'] = array_key_exists( $block['width'] ?? '', MBapp_Settings::hero_widths() )
+						? $block['width']
+						: 'container';
+
+					$clean_block['shape'] = array_key_exists( $block['shape'] ?? '', MBapp_Settings::hero_shapes() )
+						? $block['shape']
+						: 'rounded';
+
+					$clean_block['height'] = array_key_exists( $block['height'] ?? '', MBapp_Settings::hero_heights() )
 						? $block['height']
 						: 'normal';
-					$clean_block['overlay']      = min( 90, max( 0, absint( $block['overlay'] ?? 45 ) ) );
-					$clean_block['align']        = in_array( $block['align'] ?? '', array( 'left', 'center' ), true )
+
+					$clean_block['overlay'] = min( 90, max( 0, absint( $block['overlay'] ?? 45 ) ) );
+
+					$clean_block['align'] = in_array( $block['align'] ?? '', array( 'left', 'center' ), true )
 						? $block['align']
 						: 'left';
+
+					// A régi kulcsot is karbantartjuk, hogy a korábbi mentések ne törjenek.
+					$clean_block['show_image'] = ( 'none' !== $clean_block['media'] ) ? 1 : 0;
+
 					$clean_block['button_label'] = sanitize_text_field( (string) ( $block['button_label'] ?? '' ) );
 
 					$button_url = trim( (string) ( $block['button_url'] ?? '' ) );
@@ -986,19 +1014,27 @@ class MBapp_Admin {
 				</label>
 
 				<?php if ( 'hero' === $type ) : ?>
+					<?php $block = MBapp_Front_Page::hero_defaults( $block ); ?>
+
 					<label class="mbapp-field">
 						<span><?php esc_html_e( 'Alcím', 'mbapp' ); ?></span>
 						<input type="text" name="<?php echo esc_attr( $name ); ?>[subtitle]" value="<?php echo esc_attr( $block['subtitle'] ); ?>">
 					</label>
 
-					<div class="mbapp-field mbapp-field--full">
-						<span><?php esc_html_e( 'Fejléc kép', 'mbapp' ); ?></span>
-						<div class="mbapp-media">
-							<label class="mbapp-media__toggle">
-								<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[show_image]" value="1" <?php checked( $block['show_image'], 1 ); ?>>
-								<?php esc_html_e( 'Háttérkép megjelenítése', 'mbapp' ); ?>
-							</label>
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Háttér', 'mbapp' ); ?></span>
+						<select name="<?php echo esc_attr( $name ); ?>[media]" class="mbapp-hero-media">
+							<?php foreach ( MBapp_Settings::hero_media_modes() as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $block['media'], $key ); ?>>
+									<?php echo esc_html( $label ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</label>
 
+					<div class="mbapp-field mbapp-field--full mbapp-hero-single" <?php echo 'image' === $block['media'] ? '' : 'style="display:none"'; ?>>
+						<span><?php esc_html_e( 'Háttérkép', 'mbapp' ); ?></span>
+						<div class="mbapp-media">
 							<div class="mbapp-media__row">
 								<span class="mbapp-media__thumb">
 									<?php
@@ -1016,17 +1052,95 @@ class MBapp_Admin {
 						</div>
 					</div>
 
+					<div class="mbapp-field mbapp-field--full mbapp-hero-gallery" <?php echo 'slideshow' === $block['media'] ? '' : 'style="display:none"'; ?>>
+						<span><?php esc_html_e( 'A diavetítés képei', 'mbapp' ); ?></span>
+						<div class="mbapp-gallery">
+							<div class="mbapp-gallery__items">
+								<?php
+								foreach ( array_filter( array_map( 'absint', explode( ',', (string) $block['images'] ) ) ) as $image_id ) {
+									$thumb = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+
+									if ( ! $thumb ) {
+										continue;
+									}
+
+									printf(
+										'<span class="mbapp-gallery__item" data-id="%1$d"><img src="%2$s" alt=""><button type="button" class="mbapp-gallery__remove" aria-label="%3$s">&times;</button></span>',
+										(int) $image_id,
+										esc_url( $thumb ),
+										esc_attr__( 'Kép eltávolítása', 'mbapp' )
+									);
+								}
+								?>
+							</div>
+
+							<input type="hidden" class="mbapp-gallery__ids" name="<?php echo esc_attr( $name ); ?>[images]" value="<?php echo esc_attr( $block['images'] ); ?>">
+
+							<p class="mbapp-gallery__actions">
+								<button type="button" class="button mbapp-gallery__pick"><?php esc_html_e( 'Képek kiválasztása', 'mbapp' ); ?></button>
+								<button type="button" class="button-link mbapp-gallery__clear"><?php esc_html_e( 'Összes törlése', 'mbapp' ); ?></button>
+								<span class="description"><?php esc_html_e( 'A sorrend húzással módosítható.', 'mbapp' ); ?></span>
+							</p>
+						</div>
+					</div>
+
+					<div class="mbapp-hero-slideopts mbapp-field--full" <?php echo 'slideshow' === $block['media'] ? '' : 'style="display:none"'; ?>>
+						<label class="mbapp-field mbapp-field--sm">
+							<span><?php esc_html_e( 'Váltás (másodperc)', 'mbapp' ); ?></span>
+							<input type="number" name="<?php echo esc_attr( $name ); ?>[interval]" min="2" max="30" value="<?php echo esc_attr( $block['interval'] ); ?>">
+						</label>
+
+						<div class="mbapp-item__checks">
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[autoplay]" value="1" <?php checked( $block['autoplay'], 1 ); ?>>
+								<?php esc_html_e( 'Automatikus léptetés', 'mbapp' ); ?>
+							</label>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[dots]" value="1" <?php checked( $block['dots'], 1 ); ?>>
+								<?php esc_html_e( 'Pöttyök', 'mbapp' ); ?>
+							</label>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[arrows]" value="1" <?php checked( $block['arrows'], 1 ); ?>>
+								<?php esc_html_e( 'Nyilak', 'mbapp' ); ?>
+							</label>
+						</div>
+					</div>
+
 					<label class="mbapp-field mbapp-field--sm">
-						<span><?php esc_html_e( 'Magasság', 'mbapp' ); ?></span>
-						<select name="<?php echo esc_attr( $name ); ?>[height]">
-							<option value="compact" <?php selected( $block['height'], 'compact' ); ?>><?php esc_html_e( 'Alacsony', 'mbapp' ); ?></option>
-							<option value="normal" <?php selected( $block['height'], 'normal' ); ?>><?php esc_html_e( 'Közepes', 'mbapp' ); ?></option>
-							<option value="tall" <?php selected( $block['height'], 'tall' ); ?>><?php esc_html_e( 'Magas', 'mbapp' ); ?></option>
+						<span><?php esc_html_e( 'Szélesség', 'mbapp' ); ?></span>
+						<select name="<?php echo esc_attr( $name ); ?>[width]">
+							<?php foreach ( MBapp_Settings::hero_widths() as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $block['width'], $key ); ?>>
+									<?php echo esc_html( $label ); ?>
+								</option>
+							<?php endforeach; ?>
 						</select>
 					</label>
 
 					<label class="mbapp-field mbapp-field--sm">
-						<span><?php esc_html_e( 'Kép sötétítése', 'mbapp' ); ?></span>
+						<span><?php esc_html_e( 'Sarkok', 'mbapp' ); ?></span>
+						<select name="<?php echo esc_attr( $name ); ?>[shape]">
+							<?php foreach ( MBapp_Settings::hero_shapes() as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $block['shape'], $key ); ?>>
+									<?php echo esc_html( $label ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</label>
+
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Magasság', 'mbapp' ); ?></span>
+						<select name="<?php echo esc_attr( $name ); ?>[height]">
+							<?php foreach ( MBapp_Settings::hero_heights() as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $block['height'], $key ); ?>>
+									<?php echo esc_html( $label ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</label>
+
+					<label class="mbapp-field mbapp-field--sm">
+						<span><?php esc_html_e( 'Kép sötétítése (%)', 'mbapp' ); ?></span>
 						<input type="number" name="<?php echo esc_attr( $name ); ?>[overlay]" min="0" max="90" step="5" value="<?php echo esc_attr( $block['overlay'] ); ?>">
 					</label>
 

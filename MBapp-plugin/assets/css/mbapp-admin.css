@@ -388,3 +388,73 @@
 .mbapp-media__thumb img { width: 100%; height: 100%; object-fit: cover; }
 
 .mbapp-media__clear { color: #b32d2e; }
+
+/* --------------------------------------------------------------------------
+   Fejléc blokk – képgaléria a diavetítéshez
+   -------------------------------------------------------------------------- */
+.mbapp-gallery {
+	padding: 10px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+}
+
+.mbapp-gallery__items {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	min-height: 40px;
+}
+.mbapp-gallery__items:empty::before {
+	content: attr(data-empty);
+	color: #8a8f98;
+	font-size: 12px;
+}
+
+.mbapp-gallery__item {
+	position: relative;
+	display: block;
+	width: 72px;
+	height: 72px;
+	border-radius: 6px;
+	overflow: hidden;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	cursor: grab;
+}
+.mbapp-gallery__item:active { cursor: grabbing; }
+.mbapp-gallery__item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.mbapp-gallery__remove {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, .62);
+	color: #fff;
+	font-size: 14px;
+	line-height: 1;
+	cursor: pointer;
+}
+.mbapp-gallery__remove:hover { background: #b32d2e; }
+
+.mbapp-gallery__actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin: 10px 0 0;
+}
+.mbapp-gallery__clear { color: #b32d2e; }
+
+.mbapp-hero-slideopts {
+	display: flex;
+	align-items: flex-start;
+	gap: 18px;
+	flex-wrap: wrap;
+	padding: 10px 0;
+}

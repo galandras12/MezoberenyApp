@@ -36,7 +36,8 @@ MBapp-plugin/
 ## Admin menü
 
 * **MBapp → Áttekintés** – állapot, utolsó és következő futás, kézi import, shortcode súgó
-* **MBapp → Kezdőlap** – a főoldal blokkjai: fejléc kép, hírek, események, saját HTML
+* **MBapp → Kezdőlap** – a főoldal blokkjai: fejléc (kép vagy diavetítés, teljes szélesség,
+  alakzat), hírek, események, saját HTML
 * **MBapp → Hírek / Események** – a tartalmak kezelése
 * **MBapp → Hírbeolvasó** – forrás, szerkezetfelismerés, szelektorok, próbalekérés, import beállítások
 * **MBapp → Import napló** – naplózott futások, szűrés, keresés, törlés
