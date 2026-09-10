@@ -139,8 +139,16 @@ class MBapp_Settings {
 						'enabled'      => 1,
 						'title'        => '',
 						'subtitle'     => '',
+						'media'        => 'none',
 						'show_image'   => 0,
-						'image'        => '',
+						'image'        => 0,
+						'images'       => '',
+						'interval'     => 6,
+						'autoplay'     => 1,
+						'dots'         => 1,
+						'arrows'       => 0,
+						'width'        => 'container',
+						'shape'        => 'rounded',
 						'height'       => 'normal',
 						'overlay'      => 45,
 						'align'        => 'left',
@@ -237,6 +245,59 @@ class MBapp_Settings {
 			'news'   => __( 'Hírek – a legfrissebb cikkek', 'mbapp' ),
 			'html'   => __( 'Egyedi tartalom – saját HTML vagy shortcode', 'mbapp' ),
 			'page'   => __( 'Oldal tartalma – egy meglévő oldal szövege', 'mbapp' ),
+		);
+	}
+
+	/**
+	 * A fejléc blokk médiamódjai.
+	 *
+	 * @return array
+	 */
+	public static function hero_media_modes() {
+		return array(
+			'none'      => __( 'Nincs kép – színátmenetes háttér', 'mbapp' ),
+			'image'     => __( 'Egy háttérkép', 'mbapp' ),
+			'slideshow' => __( 'Diavetítés több képpel', 'mbapp' ),
+		);
+	}
+
+	/**
+	 * A fejléc blokk szélessége.
+	 *
+	 * @return array
+	 */
+	public static function hero_widths() {
+		return array(
+			'container' => __( 'A tartalom szélességében (lekerekített kártya)', 'mbapp' ),
+			'full'      => __( 'Teljes szélesség – széltől szélig', 'mbapp' ),
+		);
+	}
+
+	/**
+	 * A fejléc blokk sarkai.
+	 *
+	 * @return array
+	 */
+	public static function hero_shapes() {
+		return array(
+			'rounded' => __( 'Erősen lekerekített', 'mbapp' ),
+			'soft'    => __( 'Enyhén lekerekített', 'mbapp' ),
+			'square'  => __( 'Szögletes', 'mbapp' ),
+		);
+	}
+
+	/**
+	 * A fejléc blokk magasságai.
+	 *
+	 * @return array
+	 */
+	public static function hero_heights() {
+		return array(
+			'compact' => __( 'Alacsony', 'mbapp' ),
+			'normal'  => __( 'Közepes', 'mbapp' ),
+			'tall'    => __( 'Magas', 'mbapp' ),
+			'hero'    => __( 'Nagyon magas', 'mbapp' ),
+			'screen'  => __( 'Majdnem teljes képernyő', 'mbapp' ),
 		);
 	}
 

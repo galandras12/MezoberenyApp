@@ -4,12 +4,17 @@ plugins {
 
 android {
     namespace 'hu.mezobereny.mbapp'
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId "hu.mezobereny.mbapp"
         minSdk 23
-        targetSdk 34
+
+        // A Google Play évente emeli a megcélzott API-szint alsó határát. A 36-os
+        // szinttel az Android 16 él-a-élig (edge-to-edge) megjelenése lép életbe,
+        // amit az elrendezés a fitsSystemWindows beállítással kezel.
+        targetSdk 36
+
         versionCode 1
         versionName "1.1.0"
     }
